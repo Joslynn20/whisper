@@ -27,4 +27,5 @@ public class DeleteInfo {
     public LocalDateTime getDeleteAt() {
         return deleteAt;
     }
+    
 }
