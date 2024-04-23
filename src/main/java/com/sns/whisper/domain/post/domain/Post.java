@@ -1,8 +1,8 @@
 package com.sns.whisper.domain.post.domain;
 
 import com.sns.whisper.domain.post.domain.content.Images;
+import com.sns.whisper.domain.post.domain.content.PostContent;
 import com.sns.whisper.domain.user.domain.User;
-import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -28,8 +28,8 @@ public class Post {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
-    private String content;
+    @Embedded
+    private PostContent content;
 
     @Embedded
     private Images images;
@@ -43,7 +43,7 @@ public class Post {
     protected Post() {
     }
 
-    public Post(Long id, User user, String content, Images images, LocalDateTime createdAt,
+    public Post(Long id, User user, PostContent content, Images images, LocalDateTime createdAt,
             LocalDateTime modifiedAt) {
         this.id = id;
         this.user = user;
