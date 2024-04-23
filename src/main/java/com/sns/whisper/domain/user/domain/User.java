@@ -3,7 +3,6 @@ package com.sns.whisper.domain.user.domain;
 import com.sns.whisper.domain.user.domain.profile.BasicProfile;
 import com.sns.whisper.domain.user.domain.profile.DeleteInfo;
 import com.sns.whisper.global.entity.BaseEntity;
-import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -19,8 +18,7 @@ public class User extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(updatable = false, name = "user_id")
-    private Long no;
+    private Long id;
 
     @Embedded
     BasicProfile basicProfile;
@@ -32,17 +30,17 @@ public class User extends BaseEntity {
     }
 
     public User(BasicProfile basicProfile, DeleteInfo deleteInfo) {
-        this.no = null;
+        this.id = null;
         this.basicProfile = basicProfile;
         this.deleteInfo = deleteInfo;
     }
 
-    public Long getNo() {
-        return no;
+    public Long getId() {
+        return id;
     }
 
-    public String getId() {
-        return basicProfile.getId();
+    public String getUserId() {
+        return basicProfile.getUserId();
     }
 
     public String getPassword() {
@@ -64,7 +62,7 @@ public class User extends BaseEntity {
 
     @Override
     public int hashCode() {
-        return Objects.hash(getNo());
+        return Objects.hash(getId());
     }
 
     @Override
@@ -79,7 +77,7 @@ public class User extends BaseEntity {
 
         User user = (User) obj;
 
-        return no != null ? no.equals(user
-                .getNo()) : user.getNo() == null;
+        return id != null ? id.equals(user
+                .getId()) : user.getId() == null;
     }
 }

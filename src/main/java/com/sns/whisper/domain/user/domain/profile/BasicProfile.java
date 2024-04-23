@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 public class BasicProfile {
 
     @Column(nullable = false, unique = true, updatable = false)
-    private String id;
+    private String userId;
 
     @Column(nullable = false)
     private String password;
@@ -29,10 +29,10 @@ public class BasicProfile {
     protected BasicProfile() {
     }
 
-    public BasicProfile(String id, String password, String email, LocalDate birth,
+    public BasicProfile(String userId, String password, String email, LocalDate birth,
             String profileImage,
             String profileMessage, LocalDateTime lastUploadAt) {
-        this.id = id;
+        this.userId = userId;
         this.password = password;
         this.email = email;
         this.birth = birth;
@@ -41,8 +41,8 @@ public class BasicProfile {
         this.lastUploadAt = lastUploadAt;
     }
 
-    public String getId() {
-        return id;
+    public String getUserId() {
+        return userId;
     }
 
     public String getPassword() {
@@ -68,5 +68,5 @@ public class BasicProfile {
     public LocalDateTime getLastUploadAt() {
         return lastUploadAt;
     }
-    
+
 }
