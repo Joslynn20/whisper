@@ -2,7 +2,6 @@ package com.sns.whisper.domain.user.domain;
 
 import com.sns.whisper.domain.user.domain.profile.BasicProfile;
 import com.sns.whisper.domain.user.domain.profile.DeleteInfo;
-import com.sns.whisper.global.entity.BaseEntity;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -13,7 +12,7 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "\"user\"")
-public class User extends BaseEntity {
+public class User {
 
 
     @Id
