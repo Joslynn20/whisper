@@ -41,7 +41,13 @@ dependencies {
     runtimeOnly 'com.mysql:mysql-connector-j'
 
     // lombok
-    implementation 'org.projectlombok:lombok:1.18.26'
+    compileOnly 'org.projectlombok:lombok'
+    runtimeOnly 'com.mysql:mysql-connector-j'
+    annotationProcessor 'org.projectlombok:lombok'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+    //aws
+    implementation 'io.awspring.cloud:spring-cloud-aws-s3:3.0.2'
 }
 
 tasks.named('test') {
