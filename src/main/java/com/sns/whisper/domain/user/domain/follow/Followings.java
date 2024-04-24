@@ -4,7 +4,6 @@ import jakarta.persistence.CascadeType;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.OneToMany;
-import java.util.ArrayList;
 import java.util.List;
 
 @Embeddable
@@ -16,7 +15,7 @@ public class Followings {
             cascade = CascadeType.PERSIST,
             orphanRemoval = true
     )
-    private List<Follow> followings = new ArrayList<>();
+    private List<Follow> followings;
 
     protected Followings() {
     }
