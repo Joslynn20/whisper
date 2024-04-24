@@ -3,7 +3,6 @@ package com.sns.whisper.domain.user.domain.profile;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Embeddable
 public class BasicProfile {
@@ -24,21 +23,18 @@ public class BasicProfile {
 
     private String profileMessage;
 
-    private LocalDateTime lastUploadAt;
 
     protected BasicProfile() {
     }
 
     public BasicProfile(String userId, String password, String email, LocalDate birth,
-            String profileImage,
-            String profileMessage, LocalDateTime lastUploadAt) {
+            String profileImage, String profileMessage) {
         this.userId = userId;
         this.password = password;
         this.email = email;
         this.birth = birth;
         this.profileImage = profileImage;
         this.profileMessage = profileMessage;
-        this.lastUploadAt = lastUploadAt;
     }
 
     public String getUserId() {
@@ -64,9 +60,4 @@ public class BasicProfile {
     public String getProfileMessage() {
         return profileMessage;
     }
-
-    public LocalDateTime getLastUploadAt() {
-        return lastUploadAt;
-    }
-
 }
