@@ -4,7 +4,6 @@ import jakarta.persistence.CascadeType;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.OneToMany;
-import java.util.ArrayList;
 import java.util.List;
 
 @Embeddable
@@ -15,7 +14,7 @@ public class Comments {
             fetch = FetchType.LAZY,
             cascade = CascadeType.REMOVE
     )
-    private List<Comment> comments = new ArrayList<>();
+    private List<Comment> comments;
 
     protected Comments() {
     }
