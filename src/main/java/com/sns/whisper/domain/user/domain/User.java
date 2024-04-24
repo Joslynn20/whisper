@@ -29,6 +29,7 @@ public class User extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+
     @Embedded
     private BasicProfile basicProfile;
 
@@ -64,7 +65,7 @@ public class User extends BaseEntity {
     }
 
     @Builder
-    public User(Long id, BasicProfile basicProfile, UserStatus status, Followers followers,
+    private User(Long id, BasicProfile basicProfile, UserStatus status, Followers followers,
             Followings followings, Posts posts) {
         this.id = id;
         this.basicProfile = basicProfile;
