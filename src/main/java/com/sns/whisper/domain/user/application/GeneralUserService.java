@@ -1,12 +1,12 @@
 package com.sns.whisper.domain.user.application;
 
-import com.sns.whisper.domain.user.application.dto.request.SignUpRequest;
+import com.sns.whisper.domain.user.application.dto.request.UserCreateRequest;
 import com.sns.whisper.domain.user.application.dto.response.UserResponse;
 import com.sns.whisper.domain.user.domain.User;
-import com.sns.whisper.domain.user.domain.profile.BasicProfile;
-import com.sns.whisper.domain.user.domain.profile.UserStatus;
 import com.sns.whisper.domain.user.domain.respository.ProfileStorage;
 import com.sns.whisper.domain.user.domain.respository.UserRepository;
+import com.sns.whisper.exception.user.DuplicatedUserIdException;
+import com.sns.whisper.global.common.PasswordEncryptor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,19 +24,27 @@ public class GeneralUserService implements UserService {
     }
 
     @Override
-    public UserResponse signUp(SignUpRequest request) {
-        User savedUser = userRepository.save(createUser(request));
-        return UserResponse.from(savedUser);
+    public UserResponse signUp(UserCreateRequest request) {
+
+        if (userRepository.isDuplicatedUserId(request.getUserId())) {
+            throw new DuplicatedUserIdException();
+        }
+
+        User user = createUser(request);
+
+        User savedUser = userRepository.save(user);
+
+        return UserResponse.of(savedUser);
     }
 
-    private User createUser(SignUpRequest request) {
+    private User createUser(UserCreateRequest request) {
         String profileImage = profileStorage.store(request.getProfileImage());
+        String encryptedPassword = PasswordEncryptor.encrypt(request.getPassword());
 
-        return User.builder()
-                   .basicProfile(new BasicProfile(request.getUserId(), request.getPassword(),
-                           request.getEmail(), request.getBirth(), profileImage,
-                           request.getProfileMessage()))
-                   .status(UserStatus.PENDING)
-                   .build();
+        return User.create(request.getUserId(), encryptedPassword, request.getEmail(),
+                request.getBirth(), profileImage, request.getProfileMessage(),
+                request.getJoinedAt());
     }
+
+
 }
