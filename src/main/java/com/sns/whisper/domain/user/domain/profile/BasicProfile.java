@@ -3,38 +3,36 @@ package com.sns.whisper.domain.user.domain.profile;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import lombok.Builder;
 
 @Embeddable
 public class BasicProfile {
 
-    @Column(nullable = false, unique = true, updatable = false)
+    @Column(nullable = false, updatable = false)
     private String userId;
-
     @Column(nullable = false)
     private String password;
-
-    @Column(nullable = false)
-    private String email;
-
     @Column(nullable = false)
     private LocalDate birth;
-
     private String profileImage;
-
     private String profileMessage;
+    @Column(nullable = false)
+    private LocalDateTime joinedAt;
 
 
     protected BasicProfile() {
     }
 
-    public BasicProfile(String userId, String password, String email, LocalDate birth,
-            String profileImage, String profileMessage) {
+    @Builder
+    private BasicProfile(String userId, String password, LocalDate birth, String profileImage,
+            String profileMessage, LocalDateTime joinedAt) {
         this.userId = userId;
         this.password = password;
-        this.email = email;
         this.birth = birth;
         this.profileImage = profileImage;
         this.profileMessage = profileMessage;
+        this.joinedAt = joinedAt;
     }
 
     public String getUserId() {
@@ -43,10 +41,6 @@ public class BasicProfile {
 
     public String getPassword() {
         return password;
-    }
-
-    public String getEmail() {
-        return email;
     }
 
     public LocalDate getBirth() {
@@ -59,5 +53,9 @@ public class BasicProfile {
 
     public String getProfileMessage() {
         return profileMessage;
+    }
+
+    public LocalDateTime getJoinedAt() {
+        return joinedAt;
     }
 }

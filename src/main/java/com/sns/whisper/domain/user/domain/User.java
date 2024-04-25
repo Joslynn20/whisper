@@ -4,6 +4,7 @@ import com.sns.whisper.domain.post.domain.Posts;
 import com.sns.whisper.domain.user.domain.follow.Followers;
 import com.sns.whisper.domain.user.domain.follow.Followings;
 import com.sns.whisper.domain.user.domain.profile.BasicProfile;
+import com.sns.whisper.domain.user.domain.profile.Email;
 import com.sns.whisper.domain.user.domain.profile.UserStatus;
 import com.sns.whisper.global.entity.BaseEntity;
 import jakarta.persistence.Embedded;
@@ -15,6 +16,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Objects;
 import lombok.Builder;
@@ -29,9 +31,11 @@ public class User extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-
     @Embedded
     private BasicProfile basicProfile;
+
+    @Embedded
+    private Email email;
 
     @Enumerated(EnumType.STRING)
     private UserStatus status;
@@ -48,31 +52,47 @@ public class User extends BaseEntity {
     protected User() {
     }
 
-    public User(BasicProfile basicProfile, UserStatus status) {
-        this(null, basicProfile, status);
-    }
-
     @PersistenceCreator
-    public User(Long id, BasicProfile basicProfile, UserStatus status) {
+    public User(Long id, BasicProfile basicProfile, Email email, UserStatus status) {
         this(
                 id,
                 basicProfile,
+                email,
                 status,
                 new Followers(new ArrayList<>()),
                 new Followings(new ArrayList<>()),
-                new Posts(new ArrayList<>())
-        );
+                new Posts(new ArrayList<>()));
     }
 
+
     @Builder
-    private User(Long id, BasicProfile basicProfile, UserStatus status, Followers followers,
+    private User(Long id, BasicProfile basicProfile, Email email, UserStatus status,
+            Followers followers,
             Followings followings, Posts posts) {
         this.id = id;
         this.basicProfile = basicProfile;
+        this.email = email;
         this.status = status;
         this.followers = followers;
         this.followings = followings;
         this.posts = posts;
+    }
+
+    public static User create(String userId, String password, String email, LocalDate birth,
+            String profileImage,
+            String profileMessage, LocalDateTime joinedAt) {
+        return User.builder()
+                   .basicProfile(BasicProfile.builder()
+                                             .userId(userId)
+                                             .password(password)
+                                             .birth(birth)
+                                             .profileImage(profileImage)
+                                             .profileMessage(profileMessage)
+                                             .joinedAt(joinedAt)
+                                             .build())
+                   .email(new Email(email))
+                   .status(UserStatus.PENDING)
+                   .build();
     }
 
     public Long getId() {
@@ -88,7 +108,7 @@ public class User extends BaseEntity {
     }
 
     public String getEmail() {
-        return basicProfile.getEmail();
+        return email.getEmail();
     }
 
     public LocalDate getBirth() {
@@ -103,9 +123,27 @@ public class User extends BaseEntity {
         return basicProfile.getProfileMessage();
     }
 
+    public LocalDateTime getJoinedAt() {
+        return basicProfile.getJoinedAt();
+    }
+
     public UserStatus getStatus() {
         return status;
     }
+
+
+    public Followers getFollowers() {
+        return followers;
+    }
+
+    public Followings getFollowings() {
+        return followings;
+    }
+
+    public Posts getPosts() {
+        return posts;
+    }
+
 
     @Override
     public boolean equals(Object o) {
