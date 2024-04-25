@@ -18,4 +18,9 @@ public class UserRespositoryImpl implements UserRepository {
     public User save(User user) {
         return jpaUserRepository.save(user);
     }
+
+    @Override
+    public boolean isDuplicatedUserId(String userId) {
+        return jpaUserRepository.existsByUserId(userId);
+    }
 }
