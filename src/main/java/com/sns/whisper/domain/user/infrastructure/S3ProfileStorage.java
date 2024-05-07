@@ -1,6 +1,7 @@
 package com.sns.whisper.domain.user.infrastructure;
 
 import com.sns.whisper.domain.user.domain.respository.ProfileStorage;
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
@@ -21,7 +22,7 @@ public class S3ProfileStorage implements ProfileStorage {
     }
 
     @Override
-    public String store(MultipartFile image) {
+    public Optional<String> store(MultipartFile image) {
         return null;
     }
 }
