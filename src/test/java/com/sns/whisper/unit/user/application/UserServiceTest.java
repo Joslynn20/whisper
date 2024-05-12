@@ -60,7 +60,7 @@ public class UserServiceTest {
         assertThat(response.getId()).isNotNull();
         assertThat(response.getStatus()).isEqualTo(UserStatus.PENDING);
 
-        verify(profileStorage, times(1)).store(request.getProfileImage());
+        verify(profileStorage, times(1)).store(request.getProfileImage(), request.getUserId());
         verify(userRepository, times(1)).save(any(User.class));
 
     }
@@ -84,7 +84,7 @@ public class UserServiceTest {
     void signUp_DuplicatedUserId_Fail() {
         // given
         UserCreateRequest request = createSignUpRequest("email@gmail.com");
-        
+
         when(userRepository.isDuplicatedUserId(request.getUserId())).thenReturn(true);
 
         // when, then
