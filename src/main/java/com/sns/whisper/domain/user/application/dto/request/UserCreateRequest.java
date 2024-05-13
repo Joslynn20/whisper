@@ -1,34 +1,26 @@
-package com.sns.whisper.domain.user.domain.profile;
+package com.sns.whisper.domain.user.application.dto.request;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Embeddable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import lombok.Builder;
+import org.springframework.web.multipart.MultipartFile;
 
-@Embeddable
-public class BasicProfile {
+public class UserCreateRequest {
 
-    @Column(nullable = false, updatable = false)
     private String userId;
-    @Column(nullable = false)
     private String password;
-    @Column(nullable = false)
+    private String email;
     private LocalDate birth;
-    private String profileImage;
+    private MultipartFile profileImage;
     private String profileMessage;
-    @Column(nullable = false)
     private LocalDateTime joinedAt;
 
-
-    protected BasicProfile() {
-    }
-
     @Builder
-    private BasicProfile(String userId, String password, LocalDate birth, String profileImage,
-            String profileMessage, LocalDateTime joinedAt) {
+    private UserCreateRequest(String userId, String password, String email, LocalDate birth,
+            MultipartFile profileImage, String profileMessage, LocalDateTime joinedAt) {
         this.userId = userId;
         this.password = password;
+        this.email = email;
         this.birth = birth;
         this.profileImage = profileImage;
         this.profileMessage = profileMessage;
@@ -43,11 +35,15 @@ public class BasicProfile {
         return password;
     }
 
+    public String getEmail() {
+        return email;
+    }
+
     public LocalDate getBirth() {
         return birth;
     }
 
-    public String getProfileImage() {
+    public MultipartFile getProfileImage() {
         return profileImage;
     }
 
@@ -58,4 +54,5 @@ public class BasicProfile {
     public LocalDateTime getJoinedAt() {
         return joinedAt;
     }
+    
 }
