@@ -30,7 +30,7 @@ public class BasicProfile {
         this.userId = userId;
         this.password = password;
         this.birth = birth;
-        this.profileImage = profileImage == null ? "default" : profileImage;
+        this.profileImage = profileImage;
         this.profileMessage = profileMessage;
         this.joinedAt = joinedAt;
     }

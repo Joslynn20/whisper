@@ -12,6 +12,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
+import software.amazon.awssdk.awscore.exception.AwsServiceException;
+import software.amazon.awssdk.core.exception.SdkClientException;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.GetUrlRequest;
@@ -23,8 +25,9 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 public class S3ProfileStorage implements ProfileStorage {
 
     private final S3Client s3Client;
+    private static final String PROFILE_DIRECTORY = "user/";
+    private static final String BASIC_PROFILE = "basic_profile.png";
 
-    private static final String DIRECTORY = "user/";
 
     @Value("${whisper.aws.s3.bucket}")
     private String bucket;
@@ -37,24 +40,17 @@ public class S3ProfileStorage implements ProfileStorage {
     public Optional<String> store(MultipartFile image, String userId) {
 
         if (Objects.isNull(image) || image.isEmpty()) {
-            return Optional.ofNullable(null);
+            return Optional.of(makeBasicProfile());
         }
 
-        String newFileName = FileUtil.makeFileName(image);
-
-        StringBuilder key = new StringBuilder();
-
-        key.append(DIRECTORY)
-           .append("/")
-           .append(userId)
-           .append("/")
-           .append(newFileName);
+        String directory = makeDirectory(userId);
+        String key = FileUtil.makeFileName(directory, image);
 
         try {
             s3Client.putObject(
                     PutObjectRequest.builder()
                                     .bucket(bucket)
-                                    .key(String.valueOf(key))
+                                    .key(key)
                                     .build(),
                     RequestBody.fromByteBuffer(ByteBuffer.wrap(image.getBytes())));
 
@@ -67,9 +63,24 @@ public class S3ProfileStorage implements ProfileStorage {
 
             return Optional.ofNullable(url);
 
-        } catch (IOException e) {
+        } catch (AwsServiceException | SdkClientException | IOException e) {
             throw new FileUploadException();
         }
+    }
+
+    private String makeDirectory(String userId) {
+        return new StringBuilder().append(PROFILE_DIRECTORY)
+                                  .append("/")
+                                  .append(userId)
+                                  .append("/")
+                                  .toString();
+    }
+
+    private String makeBasicProfile() {
+        return new StringBuilder().append(baseUrl)
+                                  .append(PROFILE_DIRECTORY)
+                                  .append(BASIC_PROFILE)
+                                  .toString();
     }
 
 }
