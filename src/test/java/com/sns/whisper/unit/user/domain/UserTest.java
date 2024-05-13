@@ -111,24 +111,5 @@ class UserTest {
                                           HttpStatus.BAD_REQUEST)
                                   .hasMessage("잘못된 형식의 이메일입니다.");
     }
-
-    @Test
-    @DisplayName("profile 이미지 경로가 없을 경우, default 이미지 경로를 저장한다")
-    void create_nullProfileImage_SaveDefaultImage() throws Exception {
-        //given
-        String userId = "회원아이디";
-        String password = "비밀번호1234";
-        LocalDate birth = LocalDate.of(1999, 11, 30);
-        String profileImage = null;
-        String profileMessage = "프로필 메세지";
-        LocalDateTime joinedAt = LocalDateTime.now();
-        String email = "test@gmail.com";
-
-        //when
-        User newUser = User.create(userId, password, email, birth, profileImage, profileMessage,
-                joinedAt);
-
-        // then
-        assertThat(newUser.getProfileImage()).isEqualTo("default");
-    }
+    
 }

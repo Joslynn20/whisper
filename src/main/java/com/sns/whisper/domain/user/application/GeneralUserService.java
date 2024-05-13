@@ -7,21 +7,17 @@ import com.sns.whisper.domain.user.domain.respository.ProfileStorage;
 import com.sns.whisper.domain.user.domain.respository.UserRepository;
 import com.sns.whisper.exception.user.DuplicatedUserIdException;
 import com.sns.whisper.global.common.PasswordEncryptor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class GeneralUserService implements UserService {
 
     private final UserRepository userRepository;
-
     private final ProfileStorage profileStorage;
-
-    public GeneralUserService(UserRepository userRepository, ProfileStorage profileStorage) {
-        this.userRepository = userRepository;
-        this.profileStorage = profileStorage;
-    }
 
     @Override
     public UserResponse signUp(UserCreateRequest request) {
@@ -38,7 +34,10 @@ public class GeneralUserService implements UserService {
     }
 
     private User createUser(UserCreateRequest request) {
-        String profileImage = profileStorage.store(request.getProfileImage());
+
+        String profileImage = profileStorage.store(request.getProfileImage(), request.getUserId())
+                                            .orElse(null);
+
         String encryptedPassword = PasswordEncryptor.encrypt(request.getPassword());
 
         return User.create(request.getUserId(), encryptedPassword, request.getEmail(),
