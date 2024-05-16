@@ -9,7 +9,7 @@ import lombok.Builder;
 @Embeddable
 public class BasicProfile {
 
-    @Column(nullable = false, updatable = false)
+    @Column(nullable = false, updatable = false, unique = true)
     private String userId;
     @Column(nullable = false)
     private String password;
