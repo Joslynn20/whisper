@@ -18,15 +18,9 @@ class UserTest {
     @Test
     void create_ValidUser_Success() {
         // given
-        String userId = "회원아이디";
-        String password = "비밀번호1234";
-        LocalDate birth = LocalDate.of(1999, 11, 30);
-        String profileImage = "http://testImages.test/test.jpg";
-        String profileMessage = "프로필 메세지";
         String email = "test@gmail.com";
         // when
-        User user = User.create(userId, password, email, birth, profileImage, profileMessage,
-                LocalDateTime.now());
+        User user = createUser(LocalDateTime.now(), email);
         // then
         assertThat(user.getStatus()).isEqualTo(UserStatus.PENDING);
     }
@@ -35,17 +29,11 @@ class UserTest {
     @Test
     void create_registerDateTime_Success() {
         // given
-        String userId = "회원아이디";
-        String password = "비밀번호1234";
-        LocalDate birth = LocalDate.of(1999, 11, 30);
-        String profileImage = "http://testImages.test/test.jpg";
-        String profileMessage = "프로필 메세지";
         LocalDateTime joinedAt = LocalDateTime.now();
         String email = "test@gmail.com";
 
         // when
-        User user = User.create(userId, password, email, birth, profileImage, profileMessage,
-                joinedAt);
+        User user = createUser(joinedAt, email);
 
         // then
         assertThat(user.getJoinedAt()).isEqualTo(joinedAt);
@@ -56,60 +44,55 @@ class UserTest {
     @DisplayName("올바른 형식의 이메일을 입력하면, 회원을 생성할 수 있다")
     void create_ValidEmailFormat_Success() throws Exception {
         // given
-        String userId = "회원아이디";
-        String password = "비밀번호1234";
-        LocalDate birth = LocalDate.of(1999, 11, 30);
-        String profileImage = "http://testImages.test/test.jpg";
-        String profileMessage = "프로필 메세지";
         LocalDateTime joinedAt = LocalDateTime.now();
         String email = "test@gmail.com";
 
         //when, then
         assertThatCode(
-                () -> User.create(userId, password, email, birth, profileImage, profileMessage,
-                        joinedAt)).doesNotThrowAnyException();
+                () -> createUser(joinedAt, email)).doesNotThrowAnyException();
     }
 
     @Test
     @DisplayName("잘못된 형식의 이메일을 입력할 수 없다.")
     void create_inValidEmailFormat_ExceptionThrown() throws Exception {
         // given
-        String userId = "회원아이디";
-        String password = "비밀번호1234";
-        LocalDate birth = LocalDate.of(1999, 11, 30);
-        String profileImage = "http://testImages.test/test.jpg";
-        String profileMessage = "프로필 메세지";
         LocalDateTime joinedAt = LocalDateTime.now();
         String email = "test@test";
 
         //when, then
         assertThatCode(
-                () -> User.create(userId, password, email, birth, profileImage, profileMessage,
-                        joinedAt)).isInstanceOf(NotValidEmailFormatException.class)
-                                  .hasFieldOrPropertyWithValue("httpStatus",
-                                          HttpStatus.BAD_REQUEST)
-                                  .hasMessage("잘못된 형식의 이메일입니다.");
+                () -> createUser(joinedAt, email)).isInstanceOf(NotValidEmailFormatException.class)
+                                                  .hasFieldOrPropertyWithValue("httpStatus",
+                                                          HttpStatus.BAD_REQUEST)
+                                                  .hasMessage("잘못된 형식의 이메일입니다.");
     }
 
     @Test
     @DisplayName("Gmail 계정이 아닌 이메일을 입력할 수 없다.")
     void create_inValidEmailAccount_ExceptionThrown() throws Exception {
         //given
-        String userId = "회원아이디";
-        String password = "비밀번호1234";
-        LocalDate birth = LocalDate.of(1999, 11, 30);
-        String profileImage = "http://testImages.test/test.jpg";
-        String profileMessage = "프로필 메세지";
+
         LocalDateTime joinedAt = LocalDateTime.now();
         String email = "test@naver.com";
 
         //when, then
         assertThatCode(
-                () -> User.create(userId, password, email, birth, profileImage, profileMessage,
-                        joinedAt)).isInstanceOf(NotValidEmailFormatException.class)
-                                  .hasFieldOrPropertyWithValue("httpStatus",
-                                          HttpStatus.BAD_REQUEST)
-                                  .hasMessage("잘못된 형식의 이메일입니다.");
+                () -> createUser(joinedAt, email)).isInstanceOf(NotValidEmailFormatException.class)
+                                                  .hasFieldOrPropertyWithValue("httpStatus",
+                                                          HttpStatus.BAD_REQUEST)
+                                                  .hasMessage("잘못된 형식의 이메일입니다.");
     }
-    
+
+    private User createUser(LocalDateTime joinedAt, String email) {
+
+        String userId = "회원아이디";
+        String password = "비밀번호1234";
+        LocalDate birth = LocalDate.of(1999, 11, 30);
+        String profileImage = "http://testImages.test/test.jpg";
+        String profileMessage = "프로필 메세지";
+
+        return User.create(userId, password, email, birth, profileImage, profileMessage,
+                joinedAt);
+    }
+
 }
