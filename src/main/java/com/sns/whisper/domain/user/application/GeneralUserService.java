@@ -6,6 +6,7 @@ import com.sns.whisper.domain.user.domain.User;
 import com.sns.whisper.domain.user.domain.respository.ProfileStorage;
 import com.sns.whisper.domain.user.domain.respository.UserRepository;
 import com.sns.whisper.exception.user.DuplicatedUserIdException;
+import com.sns.whisper.exception.user.FileUploadException;
 import com.sns.whisper.global.common.PasswordEncryptor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -36,7 +37,7 @@ public class GeneralUserService implements UserService {
     private User createUser(UserCreateRequest request) {
 
         String profileImage = profileStorage.store(request.getProfileImage(), request.getUserId())
-                                            .orElse(null);
+                                            .orElseThrow(FileUploadException::new);
 
         String encryptedPassword = PasswordEncryptor.encrypt(request.getPassword());
 
