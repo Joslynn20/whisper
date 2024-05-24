@@ -9,7 +9,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.sns.whisper.domain.user.application.GeneralUserService;
-import com.sns.whisper.domain.user.application.dto.request.UserCreateRequest;
+import com.sns.whisper.domain.user.application.dto.request.UserSignUpServiceRequest;
 import com.sns.whisper.domain.user.application.dto.response.UserResponse;
 import com.sns.whisper.domain.user.domain.User;
 import com.sns.whisper.domain.user.domain.profile.BasicProfile;
@@ -47,7 +47,7 @@ public class UserServiceTest {
     @Test
     void signUp_ValidUser_ExpectPendingUser() {
         // given
-        UserCreateRequest request = createSignUpRequest("email@gmail.com");
+        UserSignUpServiceRequest request = createSignUpRequest("email@gmail.com");
 
         User savedUser = createUser(request);
         when(userRepository.save(any(User.class))).thenReturn(savedUser);
@@ -72,7 +72,7 @@ public class UserServiceTest {
     @Test
     void signUp_InValidEmail_ExceptionThrown() {
         // given
-        UserCreateRequest request = createSignUpRequest("잘못된 형식의 이메일");
+        UserSignUpServiceRequest request = createSignUpRequest("잘못된 형식의 이메일");
 
         // when
         when(profileStorage.store(any(), any())).thenReturn(Optional.of(anyString()));
@@ -89,7 +89,7 @@ public class UserServiceTest {
     @DisplayName("중복된 아이디를 입력하면, 회원가입에 실패한다.")
     void signUp_DuplicatedUserId_Fail() {
         // given
-        UserCreateRequest request = createSignUpRequest("email@gmail.com");
+        UserSignUpServiceRequest request = createSignUpRequest("email@gmail.com");
 
         when(userRepository.isDuplicatedUserId(request.getUserId())).thenReturn(true);
 
@@ -100,18 +100,18 @@ public class UserServiceTest {
                 .hasMessage("중복된 아이디입니다.");
     }
 
-    private UserCreateRequest createSignUpRequest(String email) {
-        return UserCreateRequest.builder()
-                                .userId("회원아이디")
-                                .password("비밀번호")
-                                .email(email)
-                                .birth(LocalDate.of(2024, 4, 24))
-                                .profileImage(null)
-                                .profileMessage("회원 메세지")
-                                .build();
+    private UserSignUpServiceRequest createSignUpRequest(String email) {
+        return UserSignUpServiceRequest.builder()
+                                       .userId("회원아이디")
+                                       .password("비밀번호")
+                                       .email(email)
+                                       .birth(LocalDate.of(2024, 4, 24))
+                                       .profileImage(null)
+                                       .profileMessage("회원 메세지")
+                                       .build();
     }
 
-    private User createUser(UserCreateRequest request) {
+    private User createUser(UserSignUpServiceRequest request) {
         return User.builder()
                    .id(1L)
                    .basicProfile(BasicProfile.builder()
