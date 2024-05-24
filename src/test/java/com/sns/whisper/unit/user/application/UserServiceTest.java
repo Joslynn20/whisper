@@ -86,7 +86,7 @@ public class UserServiceTest {
     }
 
     @Test
-    @DisplayName("중복된 아이디를 입력하면, 회원가입에 실패합니다.")
+    @DisplayName("중복된 아이디를 입력하면, 회원가입에 실패한다.")
     void signUp_DuplicatedUserId_Fail() {
         // given
         UserCreateRequest request = createSignUpRequest("email@gmail.com");
