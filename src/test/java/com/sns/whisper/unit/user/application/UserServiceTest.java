@@ -2,6 +2,7 @@ package com.sns.whisper.unit.user.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -20,6 +21,7 @@ import com.sns.whisper.exception.user.DuplicatedUserIdException;
 import com.sns.whisper.exception.user.NotValidEmailFormatException;
 import com.sns.whisper.global.common.PasswordEncryptor;
 import java.time.LocalDate;
+import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -49,6 +51,7 @@ public class UserServiceTest {
 
         User savedUser = createUser(request);
         when(userRepository.save(any(User.class))).thenReturn(savedUser);
+        when(profileStorage.store(any(), any())).thenReturn(Optional.of(anyString()));
 
         // when
         UserResponse response = userService.signUp(request);
@@ -71,7 +74,10 @@ public class UserServiceTest {
         // given
         UserCreateRequest request = createSignUpRequest("잘못된 형식의 이메일");
 
-        // when, then
+        // when
+        when(profileStorage.store(any(), any())).thenReturn(Optional.of(anyString()));
+
+        // then
         assertThatCode(() -> userService.signUp(request))
                 .isInstanceOf(NotValidEmailFormatException.class)
                 .hasFieldOrPropertyWithValue("httpStatus", HttpStatus.BAD_REQUEST)
@@ -92,7 +98,6 @@ public class UserServiceTest {
                 .isInstanceOf(DuplicatedUserIdException.class)
                 .hasFieldOrPropertyWithValue("httpStatus", HttpStatus.BAD_REQUEST)
                 .hasMessage("중복된 아이디입니다.");
-        ;
     }
 
     private UserCreateRequest createSignUpRequest(String email) {
