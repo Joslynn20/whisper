@@ -4,15 +4,18 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.sns.whisper.domain.user.domain.User;
 import com.sns.whisper.domain.user.infrastructure.JPAUserRepository;
+import com.sns.whisper.global.config.JpaConfiguration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 
 @ActiveProfiles("test")
+@Import(value = JpaConfiguration.class)
 @DataJpaTest
 public class UserRepositoryTest {
 
