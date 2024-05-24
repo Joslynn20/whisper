@@ -6,7 +6,9 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
-@Import(InfrastructureTestConfiguration.class)
+@Import(value = {
+        InfrastructureTestConfiguration.class
+})
 @SpringBootTest
 @ActiveProfiles("test")
 @Transactional
