@@ -4,8 +4,8 @@ package com.sns.whisper.spring.integration.user;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 
-import com.sns.whisper.domain.user.application.UserService;
-import com.sns.whisper.domain.user.application.dto.request.UserCreateRequest;
+import com.sns.whisper.domain.user.application.GeneralUserService;
+import com.sns.whisper.domain.user.application.dto.request.UserSignUpServiceRequest;
 import com.sns.whisper.domain.user.application.dto.response.UserResponse;
 import com.sns.whisper.domain.user.domain.User;
 import com.sns.whisper.domain.user.domain.profile.UserStatus;
@@ -23,7 +23,7 @@ import org.springframework.http.HttpStatus;
 public class GeneralUserServiceIntegrationTest extends IntegrationTest {
 
     @Autowired
-    private UserService userService;
+    private GeneralUserService userService;
 
     @Autowired
     private JPAUserRepository userRepository;
@@ -39,15 +39,15 @@ public class GeneralUserServiceIntegrationTest extends IntegrationTest {
     void signUp_ValidUser_Success() throws Exception {
         //given
         LocalDateTime joinedAt = LocalDateTime.now();
-        UserCreateRequest request = UserCreateRequest.builder()
-                                                     .userId("user1234")
-                                                     .password("userPassword123")
-                                                     .email("test@gmail.com")
-                                                     .birth(LocalDate.of(1996, 4, 24))
-                                                     .profileImage(null)
-                                                     .profileMessage("회원 메세지")
-                                                     .joinedAt(joinedAt)
-                                                     .build();
+        UserSignUpServiceRequest request = UserSignUpServiceRequest.builder()
+                                                                   .userId("user1234")
+                                                                   .password("userPassword123")
+                                                                   .email("test@gmail.com")
+                                                                   .birth(LocalDate.of(1996, 4, 24))
+                                                                   .profileImage(null)
+                                                                   .profileMessage("회원 메세지")
+                                                                   .joinedAt(joinedAt)
+                                                                   .build();
 
         //when
         UserResponse userResponse = userService.signUp(request);
@@ -70,15 +70,15 @@ public class GeneralUserServiceIntegrationTest extends IntegrationTest {
 
         userRepository.save(formerUser);
 
-        UserCreateRequest request = UserCreateRequest.builder()
-                                                     .userId(userId)
-                                                     .password("userPassword123")
-                                                     .email("test@gmail.com")
-                                                     .birth(LocalDate.of(1996, 4, 24))
-                                                     .profileImage(null)
-                                                     .profileMessage("회원 메세지")
-                                                     .joinedAt(LocalDateTime.now())
-                                                     .build();
+        UserSignUpServiceRequest request = UserSignUpServiceRequest.builder()
+                                                                   .userId(userId)
+                                                                   .password("userPassword123")
+                                                                   .email("test@gmail.com")
+                                                                   .birth(LocalDate.of(1996, 4, 24))
+                                                                   .profileImage(null)
+                                                                   .profileMessage("회원 메세지")
+                                                                   .joinedAt(LocalDateTime.now())
+                                                                   .build();
         //when, then
         assertThatCode(() -> userService.signUp(request)).isInstanceOf(
                                                                  DuplicatedUserIdException.class)
