@@ -1,6 +1,6 @@
 package com.sns.whisper.domain.user.application;
 
-import com.sns.whisper.domain.user.application.dto.request.UserCreateRequest;
+import com.sns.whisper.domain.user.application.dto.request.UserSignUpServiceRequest;
 import com.sns.whisper.domain.user.application.dto.response.UserResponse;
 import com.sns.whisper.domain.user.domain.User;
 import com.sns.whisper.domain.user.domain.respository.ProfileStorage;
@@ -15,13 +15,12 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class GeneralUserService implements UserService {
+public class GeneralUserService {
 
     private final UserRepository userRepository;
     private final ProfileStorage profileStorage;
 
-    @Override
-    public UserResponse signUp(UserCreateRequest request) {
+    public UserResponse signUp(UserSignUpServiceRequest request) {
 
         if (userRepository.isDuplicatedUserId(request.getUserId())) {
             throw new DuplicatedUserIdException();
@@ -34,7 +33,7 @@ public class GeneralUserService implements UserService {
         return UserResponse.of(savedUser);
     }
 
-    private User createUser(UserCreateRequest request) {
+    private User createUser(UserSignUpServiceRequest request) {
 
         String profileImage = profileStorage.store(request.getProfileImage(), request.getUserId())
                                             .orElseThrow(FileUploadException::new);
