@@ -1,6 +1,6 @@
 package com.sns.whisper.global.common;
 
-import org.springframework.security.crypto.bcrypt.BCrypt;
+import org.mindrot.jbcrypt.BCrypt;
 
 public class PasswordEncryptor {
 
