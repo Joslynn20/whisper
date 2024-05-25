@@ -1,9 +1,11 @@
 package com.sns.whisper.unit.user.presentation;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -14,6 +16,7 @@ import java.time.LocalDate;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.http.HttpMethod;
 import org.springframework.mock.web.MockMultipartFile;
@@ -82,6 +85,58 @@ public class UserControllerTest extends ControllerTest {
         verify(generalUserService, never()).signUp(any(UserSignUpServiceRequest.class));
 
     }
+
+    @Test
+    @DisplayName("유효한 회원 정보를 입력하면, 로그인 할 수 있다.")
+    void login_ValidUser_Success() throws Exception {
+        //given
+        String userId = "userId1234";
+        String password = "password1234";
+
+        //when, then
+        mockMvc.perform(post("/api/users/login").param("userId", userId)
+                                                .param("password", password))
+               .andDo(print())
+               .andExpect(status().isOk());
+
+        verify(generalUserService).login(anyString(), anyString());
+    }
+
+
+    @ParameterizedTest
+    @NullAndEmptySource
+    @ValueSource(strings = {"", " "})
+    @DisplayName("로그인 요청 시 유효한 회원 아이디를 입력하지 않으면, 예외가 발생한다.")
+    void login_NotValidUserId_ExceptionThrown(String userId) throws Exception {
+        //given
+        String password = "password1234";
+
+        //when, then
+        mockMvc.perform(post("/api/users/login").param("userId", userId)
+                                                .param("password", password))
+               .andDo(print())
+               .andExpect(status().isBadRequest());
+
+        verify(generalUserService, never()).login(anyString(), anyString());
+    }
+
+    @ParameterizedTest
+    @NullAndEmptySource
+    @ValueSource(strings = {"", " "})
+    @DisplayName("로그인 요청 시 유효한 비밀번호를 입력하지 않으면, 예외가 발생한다.")
+    void login_NotValidPassword_ExceptionThrown(String password) throws Exception {
+        //given
+        String userId = "user1234";
+
+        //when, then
+        mockMvc.perform(post("/api/users/login").param("userId", userId)
+                                                .param("password", password))
+               .andDo(print())
+               .andExpect(status().isBadRequest());
+
+        verify(generalUserService, never()).login(anyString(), anyString());
+    }
+
 
     private MultiValueMap<String, String> getParams() {
 
