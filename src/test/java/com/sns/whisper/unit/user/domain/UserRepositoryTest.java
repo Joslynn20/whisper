@@ -2,6 +2,7 @@ package com.sns.whisper.unit.user.domain;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.sns.whisper.common.factory.UserFactory;
 import com.sns.whisper.domain.user.domain.User;
 import com.sns.whisper.domain.user.infrastructure.JPAUserRepository;
 import com.sns.whisper.global.config.JpaConfiguration;
@@ -43,5 +44,25 @@ public class UserRepositoryTest {
 
         //then
         assertThat(result).isTrue();
+    }
+
+    @Test
+    @DisplayName("회원 아이디로 회원을 조회할 수 있다.")
+    void findUserByUserId() throws Exception {
+        //given
+        String userId = "userId12";
+        String password = "password1234";
+
+        User user = UserFactory.createBasicUser(userId, password);
+        userRepository.save(user);
+
+        //when
+        User savedUser = userRepository.findUserByBasicProfileUserId(userId)
+                                       .orElse(null);
+
+        //then
+        assertThat(savedUser).isNotNull();
+        assertThat(savedUser.getUserId()).isEqualTo(userId);
+        assertThat(savedUser.getPassword()).isEqualTo(user.getPassword());
     }
 }
