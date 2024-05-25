@@ -64,6 +64,7 @@ public class UserServiceTest {
         assertThat(response.getStatus()).isEqualTo(UserStatus.PENDING);
 
         verify(profileStorage, times(1)).store(request.getProfileImage(), request.getUserId());
+        verify(userRepository, times(1)).isDuplicatedUserId(any(String.class));
         verify(userRepository, times(1)).save(any(User.class));
 
     }
