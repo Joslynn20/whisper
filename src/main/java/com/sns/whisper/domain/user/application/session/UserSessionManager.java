@@ -1,4 +1,4 @@
-package com.sns.whisper.domain.user.application;
+package com.sns.whisper.domain.user.application.session;
 
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
