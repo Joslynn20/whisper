@@ -2,13 +2,14 @@ package com.sns.whisper.unit.user.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.sns.whisper.domain.user.application.GeneralUserService;
-import com.sns.whisper.domain.user.application.dto.request.UserCreateRequest;
+import com.sns.whisper.domain.user.application.dto.request.UserSignUpServiceRequest;
 import com.sns.whisper.domain.user.application.dto.response.UserResponse;
 import com.sns.whisper.domain.user.domain.User;
 import com.sns.whisper.domain.user.domain.profile.BasicProfile;
@@ -20,6 +21,7 @@ import com.sns.whisper.exception.user.DuplicatedUserIdException;
 import com.sns.whisper.exception.user.NotValidEmailFormatException;
 import com.sns.whisper.global.common.PasswordEncryptor;
 import java.time.LocalDate;
+import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -45,10 +47,11 @@ public class UserServiceTest {
     @Test
     void signUp_ValidUser_ExpectPendingUser() {
         // given
-        UserCreateRequest request = createSignUpRequest("email@gmail.com");
+        UserSignUpServiceRequest request = createSignUpRequest("email@gmail.com");
 
         User savedUser = createUser(request);
         when(userRepository.save(any(User.class))).thenReturn(savedUser);
+        when(profileStorage.store(any(), any())).thenReturn(Optional.of(anyString()));
 
         // when
         UserResponse response = userService.signUp(request);
@@ -61,6 +64,7 @@ public class UserServiceTest {
         assertThat(response.getStatus()).isEqualTo(UserStatus.PENDING);
 
         verify(profileStorage, times(1)).store(request.getProfileImage(), request.getUserId());
+        verify(userRepository, times(1)).isDuplicatedUserId(any(String.class));
         verify(userRepository, times(1)).save(any(User.class));
 
     }
@@ -69,9 +73,12 @@ public class UserServiceTest {
     @Test
     void signUp_InValidEmail_ExceptionThrown() {
         // given
-        UserCreateRequest request = createSignUpRequest("잘못된 형식의 이메일");
+        UserSignUpServiceRequest request = createSignUpRequest("잘못된 형식의 이메일");
 
-        // when, then
+        // when
+        when(profileStorage.store(any(), any())).thenReturn(Optional.of(anyString()));
+
+        // then
         assertThatCode(() -> userService.signUp(request))
                 .isInstanceOf(NotValidEmailFormatException.class)
                 .hasFieldOrPropertyWithValue("httpStatus", HttpStatus.BAD_REQUEST)
@@ -80,10 +87,10 @@ public class UserServiceTest {
     }
 
     @Test
-    @DisplayName("중복된 아이디를 입력하면, 회원가입에 실패합니다.")
+    @DisplayName("중복된 아이디를 입력하면, 회원가입에 실패한다.")
     void signUp_DuplicatedUserId_Fail() {
         // given
-        UserCreateRequest request = createSignUpRequest("email@gmail.com");
+        UserSignUpServiceRequest request = createSignUpRequest("email@gmail.com");
 
         when(userRepository.isDuplicatedUserId(request.getUserId())).thenReturn(true);
 
@@ -92,21 +99,20 @@ public class UserServiceTest {
                 .isInstanceOf(DuplicatedUserIdException.class)
                 .hasFieldOrPropertyWithValue("httpStatus", HttpStatus.BAD_REQUEST)
                 .hasMessage("중복된 아이디입니다.");
-        ;
     }
 
-    private UserCreateRequest createSignUpRequest(String email) {
-        return UserCreateRequest.builder()
-                                .userId("회원아이디")
-                                .password("비밀번호")
-                                .email(email)
-                                .birth(LocalDate.of(2024, 4, 24))
-                                .profileImage(null)
-                                .profileMessage("회원 메세지")
-                                .build();
+    private UserSignUpServiceRequest createSignUpRequest(String email) {
+        return UserSignUpServiceRequest.builder()
+                                       .userId("회원아이디")
+                                       .password("비밀번호")
+                                       .email(email)
+                                       .birth(LocalDate.of(2024, 4, 24))
+                                       .profileImage(null)
+                                       .profileMessage("회원 메세지")
+                                       .build();
     }
 
-    private User createUser(UserCreateRequest request) {
+    private User createUser(UserSignUpServiceRequest request) {
         return User.builder()
                    .id(1L)
                    .basicProfile(BasicProfile.builder()
