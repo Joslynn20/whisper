@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 
 import com.sns.whisper.common.factory.UserFactory;
-import com.sns.whisper.domain.user.application.GeneralUserService;
+import com.sns.whisper.domain.user.application.UserService;
 import com.sns.whisper.domain.user.application.dto.request.UserSignUpServiceRequest;
 import com.sns.whisper.domain.user.application.dto.response.UserResponse;
 import com.sns.whisper.domain.user.application.session.SessionManager;
@@ -25,10 +25,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 
 
-public class GeneralUserServiceIntegrationTest extends IntegrationTest {
+public class UserServiceIntegrationTest extends IntegrationTest {
 
     @Autowired
-    private GeneralUserService userService;
+    private UserService userService;
 
     @Autowired
     private JPAUserRepository userRepository;

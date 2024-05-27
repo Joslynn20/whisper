@@ -17,7 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class GeneralUserService {
+public class UserService {
 
     private final UserRepository userRepository;
     private final ProfileStorage profileStorage;
