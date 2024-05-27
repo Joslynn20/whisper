@@ -99,7 +99,7 @@ public class UserControllerTest extends ControllerTest {
                .andDo(print())
                .andExpect(status().isOk());
 
-        verify(userService).login(anyString(), anyString());
+        verify(loginService).login(anyString(), anyString());
     }
 
 
@@ -117,7 +117,7 @@ public class UserControllerTest extends ControllerTest {
                .andDo(print())
                .andExpect(status().isBadRequest());
 
-        verify(userService, never()).login(anyString(), anyString());
+        verify(loginService, never()).login(anyString(), anyString());
     }
 
     @ParameterizedTest
@@ -134,7 +134,7 @@ public class UserControllerTest extends ControllerTest {
                .andDo(print())
                .andExpect(status().isBadRequest());
 
-        verify(userService, never()).login(anyString(), anyString());
+        verify(loginService, never()).login(anyString(), anyString());
     }
 
 
