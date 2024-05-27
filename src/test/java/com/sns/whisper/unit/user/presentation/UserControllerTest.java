@@ -42,7 +42,7 @@ public class UserControllerTest extends ControllerTest {
                .andExpect(status().isCreated())
                .andExpect(jsonPath("$.message").value("회원가입에 성공했습니다."));
 
-        verify(generalUserService).signUp(any(UserSignUpServiceRequest.class));
+        verify(userService).signUp(any(UserSignUpServiceRequest.class));
     }
 
     @ParameterizedTest
@@ -62,7 +62,7 @@ public class UserControllerTest extends ControllerTest {
                .andDo(print())
                .andExpect(status().isBadRequest());
 
-        verify(generalUserService, never()).signUp(any(UserSignUpServiceRequest.class));
+        verify(userService, never()).signUp(any(UserSignUpServiceRequest.class));
     }
 
     @ParameterizedTest
@@ -82,7 +82,7 @@ public class UserControllerTest extends ControllerTest {
                .andDo(print())
                .andExpect(status().isBadRequest());
 
-        verify(generalUserService, never()).signUp(any(UserSignUpServiceRequest.class));
+        verify(userService, never()).signUp(any(UserSignUpServiceRequest.class));
 
     }
 
@@ -99,7 +99,7 @@ public class UserControllerTest extends ControllerTest {
                .andDo(print())
                .andExpect(status().isOk());
 
-        verify(generalUserService).login(anyString(), anyString());
+        verify(userService).login(anyString(), anyString());
     }
 
 
@@ -117,7 +117,7 @@ public class UserControllerTest extends ControllerTest {
                .andDo(print())
                .andExpect(status().isBadRequest());
 
-        verify(generalUserService, never()).login(anyString(), anyString());
+        verify(userService, never()).login(anyString(), anyString());
     }
 
     @ParameterizedTest
@@ -134,7 +134,7 @@ public class UserControllerTest extends ControllerTest {
                .andDo(print())
                .andExpect(status().isBadRequest());
 
-        verify(generalUserService, never()).login(anyString(), anyString());
+        verify(userService, never()).login(anyString(), anyString());
     }
 
 

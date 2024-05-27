@@ -11,7 +11,7 @@ import static org.mockito.Mockito.when;
 
 import com.sns.whisper.common.factory.UserFactory;
 import com.sns.whisper.common.mockapi.MockUserSessionManager;
-import com.sns.whisper.domain.user.application.GeneralUserService;
+import com.sns.whisper.domain.user.application.UserService;
 import com.sns.whisper.domain.user.application.dto.request.UserSignUpServiceRequest;
 import com.sns.whisper.domain.user.application.dto.response.UserResponse;
 import com.sns.whisper.domain.user.domain.User;
@@ -39,7 +39,7 @@ import org.springframework.http.HttpStatus;
 public class UserServiceTest {
 
     @InjectMocks
-    private GeneralUserService userService;
+    private UserService userService;
 
     @Mock
     private ProfileStorage profileStorage;

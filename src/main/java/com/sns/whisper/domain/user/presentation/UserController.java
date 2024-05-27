@@ -1,6 +1,6 @@
 package com.sns.whisper.domain.user.presentation;
 
-import com.sns.whisper.domain.user.application.GeneralUserService;
+import com.sns.whisper.domain.user.application.UserService;
 import com.sns.whisper.domain.user.presentation.request.UserSignUpRequest;
 import com.sns.whisper.global.dto.HttpResponseDto;
 import jakarta.validation.Valid;
@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/users")
 public class UserController {
 
-    private final GeneralUserService userService;
+    private final UserService userService;
 
     @PostMapping
     public ResponseEntity<?> signUp(@Valid UserSignUpRequest request) {
