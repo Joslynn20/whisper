@@ -1,6 +1,7 @@
 package com.sns.whisper.unit;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sns.whisper.domain.user.application.LoginService;
 import com.sns.whisper.domain.user.application.UserService;
 import com.sns.whisper.domain.user.presentation.UserController;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,9 @@ public class ControllerTest {
 
     @MockBean
     protected UserService userService;
+
+    @MockBean
+    protected LoginService loginService;
 
     @Autowired
     protected MockMvc mockMvc;

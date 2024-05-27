@@ -1,5 +1,6 @@
 package com.sns.whisper.domain.user.presentation;
 
+import com.sns.whisper.domain.user.application.LoginService;
 import com.sns.whisper.domain.user.application.UserService;
 import com.sns.whisper.domain.user.presentation.request.UserSignUpRequest;
 import com.sns.whisper.global.dto.HttpResponseDto;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserController {
 
     private final UserService userService;
+    private final LoginService loginService;
 
     @PostMapping
     public ResponseEntity<?> signUp(@Valid UserSignUpRequest request) {
@@ -31,7 +33,7 @@ public class UserController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@NotBlank String userId, @NotBlank String password) {
-        userService.login(userId, password);
+        loginService.login(userId, password);
         return HttpResponseDto.ok(HttpStatus.OK, "로그인되었습니다.");
     }
 
