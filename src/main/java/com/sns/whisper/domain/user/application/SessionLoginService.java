@@ -30,4 +30,9 @@ public class SessionLoginService implements LoginService {
 
     }
 
+    @Override
+    public void logout() {
+        sessionManager.deleteUser();
+    }
+
 }

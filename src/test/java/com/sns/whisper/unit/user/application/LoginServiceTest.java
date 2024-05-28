@@ -53,7 +53,7 @@ public class LoginServiceTest {
         loginService.login(userId, password);
 
         //then
-        assertThat(sessionManager.extractUser("ACCESS_USER")).isEqualTo(userId);
+        assertThat(sessionManager.extractUser()).isEqualTo(userId);
         assertThat(PasswordEncryptor.isMatch(password, savedUser.getPassword())).isTrue();
         verify(userRepository).findUserByUserId(userId);
     }
@@ -102,5 +102,20 @@ public class LoginServiceTest {
 
         verify(userRepository, times(1)).findUserByUserId(any(String.class));
         verify(sessionManager, never()).saveUser(any(String.class));
+    }
+
+    @Test
+    @DisplayName("로그아웃 시 세션에 저장된 회원 아이디를 삭제한다.")
+    void logout_request_Success() throws Exception {
+        //given
+        String userId = "userId123";
+        sessionManager.saveUser(userId);
+
+        //when
+        loginService.logout();
+
+        //then
+        assertThat(sessionManager.extractUser()).isNull();
+
     }
 }

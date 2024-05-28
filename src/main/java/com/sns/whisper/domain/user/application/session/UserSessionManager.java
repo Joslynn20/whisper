@@ -19,7 +19,12 @@ public class UserSessionManager implements SessionManager {
     }
 
     @Override
-    public String extractUser(String userId) {
-        return null;
+    public String extractUser() {
+        return (String) session.getAttribute(USER_SESSION_KEY);
+    }
+
+    @Override
+    public void deleteUser() {
+        session.removeAttribute(USER_SESSION_KEY);
     }
 }
