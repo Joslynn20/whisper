@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -35,6 +36,12 @@ public class UserController {
     public ResponseEntity<?> login(@NotBlank String userId, @NotBlank String password) {
         loginService.login(userId, password);
         return HttpResponseDto.ok(HttpStatus.OK, "로그인되었습니다.");
+    }
+
+    @DeleteMapping("/logout")
+    public ResponseEntity<?> logout() {
+        loginService.logout();
+        return HttpResponseDto.ok(HttpStatus.OK, "로그아웃되었습니다.");
     }
 
 }

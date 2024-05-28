@@ -20,8 +20,12 @@ public class MockUserSessionManager implements SessionManager {
     }
 
     @Override
-    public String extractUser(String userId) {
-        return session.getAttribute(USER_SESSION_KEY)
-                      .toString();
+    public String extractUser() {
+        return (String) session.getAttribute(USER_SESSION_KEY);
+    }
+
+    @Override
+    public void deleteUser() {
+        session.removeAttribute(USER_SESSION_KEY);
     }
 }

@@ -4,5 +4,7 @@ public interface SessionManager {
 
     void saveUser(String userId);
 
-    String extractUser(String userId);
+    String extractUser();
+
+    void deleteUser();
 }
