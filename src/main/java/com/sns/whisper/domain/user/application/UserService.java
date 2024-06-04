@@ -8,7 +8,6 @@ import com.sns.whisper.domain.user.domain.respository.ProfileStorage;
 import com.sns.whisper.domain.user.domain.respository.UserRepository;
 import com.sns.whisper.exception.user.DuplicatedUserIdException;
 import com.sns.whisper.exception.user.FileUploadException;
-import com.sns.whisper.exception.user.LoginFailException;
 import com.sns.whisper.global.common.PasswordEncryptor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class GeneralUserService {
+public class UserService {
 
     private final UserRepository userRepository;
     private final ProfileStorage profileStorage;
@@ -51,16 +50,4 @@ public class GeneralUserService {
                 request.getJoinedAt());
     }
 
-
-    public void login(String userId, String password) {
-        User savedUser = userRepository.findUserByUserId(userId)
-                                       .orElseThrow(LoginFailException::new);
-
-        if (!PasswordEncryptor.isMatch(password, savedUser.getPassword())) {
-            throw new LoginFailException();
-        }
-
-        sessionManager.saveUser(userId);
-
-    }
 }
