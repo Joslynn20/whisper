@@ -48,7 +48,7 @@ public class LoginServiceIntegrationTest extends IntegrationTest {
         loginService.login(userId, password);
 
         //then
-        assertThat(sessionManager.extractUser("ACCESS_USER")).isEqualTo(userId);
+        assertThat(sessionManager.extractUser()).isEqualTo(userId);
         assertThat(PasswordEncryptor.isMatch(password, user.getPassword())).isTrue();
 
     }
