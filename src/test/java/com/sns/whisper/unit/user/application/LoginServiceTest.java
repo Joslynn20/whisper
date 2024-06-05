@@ -118,4 +118,19 @@ public class LoginServiceTest {
         assertThat(sessionManager.extractUser()).isNull();
 
     }
+
+    @Test
+    @DisplayName("세션에 저장된 회원 아이디를 가져올 수 있다.")
+    void getCurrentUserId_request_Success() throws Exception {
+        //given
+        String userId = "userId123";
+        sessionManager.saveUser(userId);
+
+        //when
+        String currentUserId = loginService.getCurrentUserId();
+
+        //then
+        assertThat(currentUserId).isEqualTo(userId);
+
+    }
 }

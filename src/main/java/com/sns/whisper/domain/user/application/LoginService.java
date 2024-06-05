@@ -5,4 +5,6 @@ public interface LoginService {
     void login(String userId, String password);
 
     void logout();
+
+    String getCurrentUserId();
 }

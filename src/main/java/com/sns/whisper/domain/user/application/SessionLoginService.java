@@ -35,4 +35,9 @@ public class SessionLoginService implements LoginService {
         sessionManager.deleteUser();
     }
 
+    @Override
+    public String getCurrentUserId() {
+        return sessionManager.extractUser();
+    }
+
 }
