@@ -1,4 +1,4 @@
-package com.sns.whisper.global.annotation.validation;
+package com.sns.whisper.global.validation;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
