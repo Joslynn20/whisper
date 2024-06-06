@@ -1,7 +1,7 @@
 package com.sns.whisper.domain.user.presentation.request;
 
 import com.sns.whisper.domain.user.application.dto.request.UserSignUpServiceRequest;
-import com.sns.whisper.domain.user.presentation.request.validation.AllowedContentType;
+import com.sns.whisper.global.validation.AllowedContentType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
