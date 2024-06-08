@@ -6,11 +6,13 @@ import org.springframework.web.multipart.MultipartFile;
 
 public class FileUtil {
 
-    public static String makeFileName(String directory, MultipartFile multipartFile) {
-        return createFileName(directory, multipartFile).toString();
+    public static String makeFileName(String directory, String userId,
+            MultipartFile multipartFile) {
+        return createFileName(directory, userId, multipartFile).toString();
     }
 
-    private static StringBuilder createFileName(String directory, MultipartFile multipartFile) {
+    private static StringBuilder createFileName(String directory, String userId,
+            MultipartFile multipartFile) {
         String uuid = UUID.randomUUID()
                           .toString();
 
@@ -19,6 +21,9 @@ public class FileUtil {
         StringBuilder fileName = new StringBuilder();
 
         fileName.append(directory)
+                .append("/")
+                .append(userId)
+                .append("/")
                 .append(uuid)
                 .append(".")
                 .append(extension);
