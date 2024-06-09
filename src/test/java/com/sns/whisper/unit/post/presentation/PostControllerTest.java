@@ -1,14 +1,20 @@
-package com.sns.whisper.unit.user.presentation;
+package com.sns.whisper.unit.post.presentation;
 
+import static java.util.Objects.requireNonNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.sns.whisper.domain.post.application.dto.request.PostUploadServiceRequest;
+import com.sns.whisper.exception.post.NotAuthorizedUserException;
 import com.sns.whisper.unit.ControllerTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,6 +22,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.http.HttpMethod;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 
 public class PostControllerTest extends ControllerTest {
 
@@ -32,6 +39,8 @@ public class PostControllerTest extends ControllerTest {
         MockMultipartFile image2 = new MockMultipartFile("images",
                 "image2.png", "image/png", "images".getBytes());
 
+        when(loginService.getCurrentUserId()).thenReturn("testId");
+
         //when, then
         mockMvc.perform(multipart(HttpMethod.POST, "/api/posts").file(image1)
                                                                 .file(image2)
@@ -42,6 +51,30 @@ public class PostControllerTest extends ControllerTest {
                .andExpect(jsonPath("$.message").value("게시물을 업로드했습니다."));
 
         verify(postService).uploadPost(any(PostUploadServiceRequest.class));
+
+    }
+
+    @Test
+    @DisplayName("로그인 하지 않은 회원은 게시물을 작성할 수 없다.")
+    void uploadPost_NotLoginUser_403Exception() throws Exception {
+        //given
+        String content = "새로운 게시물입니다.";
+        MockMultipartFile image = new MockMultipartFile("images",
+                "image1.png", "image/png", "images".getBytes());
+
+        //when, then
+        mockMvc.perform(multipart(HttpMethod.POST, "/api/posts")
+                       .param("content", content)
+               )
+               .andDo(print())
+               .andExpect(status().isUnauthorized())
+               .andExpect(result -> assertInstanceOf(NotAuthorizedUserException.class,
+                       result.getResolvedException()))
+               .andExpect(result -> assertEquals(requireNonNull(result.getResolvedException())
+                       .getMessage(), "로그인 후 이용 가능합니다."));
+
+        verify(loginService, times(1)).getCurrentUserId();
+        verify(postService, never()).uploadPost(any(PostUploadServiceRequest.class));
 
     }
 
@@ -64,8 +97,9 @@ public class PostControllerTest extends ControllerTest {
                                                                 .param("content", content)
                )
                .andDo(print())
-               .andExpect(status().isBadRequest());
-
+               .andExpect(status().isBadRequest())
+               .andExpect(result -> assertInstanceOf(MethodArgumentNotValidException.class,
+                       result.getResolvedException()));
         verify(postService, never()).uploadPost(any(PostUploadServiceRequest.class));
 
     }
@@ -85,7 +119,9 @@ public class PostControllerTest extends ControllerTest {
                                                                 .param("content", content)
                )
                .andDo(print())
-               .andExpect(status().isBadRequest());
+               .andExpect(status().isBadRequest())
+               .andExpect(result -> assertInstanceOf(MethodArgumentNotValidException.class,
+                       result.getResolvedException()));
 
         verify(postService, never()).uploadPost(any(PostUploadServiceRequest.class));
 
@@ -106,7 +142,9 @@ public class PostControllerTest extends ControllerTest {
                                                                 .param("content", content)
                )
                .andDo(print())
-               .andExpect(status().isBadRequest());
+               .andExpect(status().isBadRequest())
+               .andExpect(result -> assertInstanceOf(MethodArgumentNotValidException.class,
+                       result.getResolvedException()));
 
         verify(postService, never()).uploadPost(any(PostUploadServiceRequest.class));
 
@@ -126,7 +164,9 @@ public class PostControllerTest extends ControllerTest {
                                                                 .param("content", content)
                )
                .andDo(print())
-               .andExpect(status().isBadRequest());
+               .andExpect(status().isBadRequest())
+               .andExpect(result -> assertInstanceOf(MethodArgumentNotValidException.class,
+                       result.getResolvedException()));
 
         verify(postService, never()).uploadPost(any(PostUploadServiceRequest.class));
 
