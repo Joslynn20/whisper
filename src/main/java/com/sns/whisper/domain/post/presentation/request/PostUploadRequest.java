@@ -4,6 +4,7 @@ import com.sns.whisper.domain.post.application.dto.request.PostUploadServiceRequ
 import com.sns.whisper.global.validation.AllowedContentType;
 import com.sns.whisper.global.validation.MaxImageAmount;
 import jakarta.validation.constraints.Size;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -21,11 +22,12 @@ public class PostUploadRequest {
 
     @MaxImageAmount
     private List<@AllowedContentType(allowedTypes = {"image/jpg", "image/jpeg", "image/png"},
-            allowedExtensions = {"jpg", "jpeg", "png"}) MultipartFile> images;
+            allowedExtensions = {"jpg", "jpeg", "png"}) MultipartFile> images = new ArrayList<>();
 
-    public PostUploadServiceRequest toServiceRequest() {
+    public PostUploadServiceRequest toServiceRequest(String userId) {
         return PostUploadServiceRequest.builder()
                                        .content(content)
+                                       .userId(userId)
                                        .images(images)
                                        .build();
     }
