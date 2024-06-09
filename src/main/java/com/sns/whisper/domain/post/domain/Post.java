@@ -1,5 +1,7 @@
 package com.sns.whisper.domain.post.domain;
 
+import static java.util.stream.Collectors.toList;
+
 import com.sns.whisper.domain.post.domain.content.Image;
 import com.sns.whisper.domain.post.domain.content.Images;
 import com.sns.whisper.domain.user.domain.User;
@@ -15,7 +17,6 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.util.List;
 import java.util.Objects;
-import lombok.Builder;
 
 @Entity
 @Table(name = "post")
@@ -39,16 +40,65 @@ public class Post {
     protected Post() {
     }
 
-    @Builder
-    private Post(Long id, User user, String content, List<String> imageUrls) {
+    private Post(Long id, User user, String content, Images images) {
         this.id = id;
         this.user = user;
         this.content = content;
-        List<Image> images = imageUrls.stream()
-                                      .map(Image::new)
-                                      .toList();
-        this.images = new Images(images);
-        this.images.belongTo(this);
+        this.images = images;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static class Builder {
+
+        private Long id;
+        private User user;
+        private Images images = new Images(List.of());
+        private String content;
+
+        public Builder id(Long id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder user(User user) {
+            this.user = user;
+            return this;
+        }
+
+        public Builder images(List<String> imageUrls) {
+            List<Image> images = imageUrls.stream()
+                                          .map(Image::new)
+                                          .collect(toList());
+
+            this.images = new Images(images);
+            return this;
+        }
+
+        public Builder images(Images images) {
+            this.images = images;
+            return this;
+        }
+
+        public Builder content(String content) {
+            this.content = content;
+            return this;
+        }
+
+        public Post build() {
+            return new Post(
+                    id,
+                    user,
+                    content,
+                    images
+            );
+        }
     }
 
     @Override
