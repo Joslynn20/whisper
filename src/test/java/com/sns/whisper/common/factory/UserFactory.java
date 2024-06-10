@@ -15,4 +15,11 @@ public class UserFactory {
                 "basic_profile.png",
                 "프로필 메세지", LocalDateTime.now());
     }
+
+    public static User user(Long id, String userId) {
+        return MockUser.builder()
+                       .id(id)
+                       .userId(userId)
+                       .build();
+    }
 }
