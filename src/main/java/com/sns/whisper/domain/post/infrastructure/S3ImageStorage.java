@@ -1,12 +1,11 @@
-package com.sns.whisper.domain.user.infrastructure;
+package com.sns.whisper.domain.post.infrastructure;
 
-import com.sns.whisper.domain.user.domain.respository.ProfileStorage;
+import com.sns.whisper.domain.post.domain.repository.ImageStorage;
 import com.sns.whisper.exception.user.FileUploadException;
 import com.sns.whisper.global.common.FileUtil;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
@@ -19,32 +18,28 @@ import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.GetUrlRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
-@Profile("!test")
 @Component
+@Profile("!test")
 @RequiredArgsConstructor
-public class S3ProfileStorage implements ProfileStorage {
+public class S3ImageStorage implements ImageStorage {
 
     private final S3Client s3Client;
-    private static final String PROFILE_DIRECTORY = "user";
-    private static final String BASIC_PROFILE = "basic_profile.png";
-
+    private static final String IMAGE_DIRECTORY = "post";
 
     @Value("${whisper.aws.s3.bucket}")
     private String bucket;
 
-    @Value("${whisper.aws.s3.base-url}")
-    private String baseUrl;
-
 
     @Override
-    public Optional<String> store(MultipartFile image, String userId) {
+    public List<String> storeImages(List<MultipartFile> images, String userId) {
+        return images.stream()
+                     .map(image -> uploadImage(
+                             FileUtil.makeFileName(IMAGE_DIRECTORY, userId, image),
+                             image))
+                     .toList();
+    }
 
-        if (Objects.isNull(image) || image.isEmpty()) {
-            return Optional.of(makeBasicProfile());
-        }
-
-        String key = FileUtil.makeFileName(PROFILE_DIRECTORY, userId, image);
-
+    private String uploadImage(String key, MultipartFile image) {
         try {
             s3Client.putObject(
                     PutObjectRequest.builder()
@@ -53,25 +48,15 @@ public class S3ProfileStorage implements ProfileStorage {
                                     .build(),
                     RequestBody.fromByteBuffer(ByteBuffer.wrap(image.getBytes())));
 
-            String url = s3Client.utilities()
-                                 .getUrl(GetUrlRequest.builder()
-                                                      .bucket(bucket)
-                                                      .key(key)
-                                                      .build())
-                                 .toExternalForm();
-
-            return Optional.ofNullable(url);
+            return s3Client.utilities()
+                           .getUrl(GetUrlRequest.builder()
+                                                .bucket(bucket)
+                                                .key(key)
+                                                .build())
+                           .toExternalForm();
 
         } catch (AwsServiceException | SdkClientException | IOException e) {
             throw new FileUploadException();
         }
     }
-
-    private String makeBasicProfile() {
-        return new StringBuilder().append(baseUrl)
-                                  .append(PROFILE_DIRECTORY)
-                                  .append(BASIC_PROFILE)
-                                  .toString();
-    }
-
 }
