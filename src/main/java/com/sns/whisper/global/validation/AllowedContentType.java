@@ -1,4 +1,4 @@
-package com.sns.whisper.domain.user.presentation.request.validation;
+package com.sns.whisper.global.validation;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;

@@ -1,6 +1,8 @@
 package com.sns.whisper.unit;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sns.whisper.domain.post.application.PostService;
+import com.sns.whisper.domain.post.presentation.PostController;
 import com.sns.whisper.domain.user.application.LoginService;
 import com.sns.whisper.domain.user.application.UserService;
 import com.sns.whisper.domain.user.presentation.UserController;
@@ -10,7 +12,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
-@WebMvcTest({UserController.class})
+@WebMvcTest({UserController.class, PostController.class})
 @ActiveProfiles("test")
 public class ControllerTest {
 
@@ -19,6 +21,9 @@ public class ControllerTest {
 
     @MockBean
     protected LoginService loginService;
+
+    @MockBean
+    protected PostService postService;
 
     @Autowired
     protected MockMvc mockMvc;
