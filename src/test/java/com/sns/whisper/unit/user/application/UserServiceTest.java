@@ -3,10 +3,10 @@ package com.sns.whisper.unit.user.application;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import com.sns.whisper.domain.user.application.UserService;
 import com.sns.whisper.domain.user.application.dto.request.UserSignUpServiceRequest;
@@ -50,8 +50,8 @@ public class UserServiceTest {
         UserSignUpServiceRequest request = createSignUpRequest("email@gmail.com");
 
         User savedUser = createUser(request);
-        when(userRepository.save(any(User.class))).thenReturn(savedUser);
-        when(profileStorage.store(any(), any())).thenReturn(Optional.of(anyString()));
+        given(userRepository.save(any(User.class))).willReturn(savedUser);
+        given(profileStorage.store(any(), any())).willReturn(Optional.of(anyString()));
 
         // when
         UserResponse response = userService.signUp(request);
@@ -75,10 +75,8 @@ public class UserServiceTest {
         // given
         UserSignUpServiceRequest request = createSignUpRequest("잘못된 형식의 이메일");
 
-        // when
-        when(profileStorage.store(any(), any())).thenReturn(Optional.of(anyString()));
-
-        // then
+        given(profileStorage.store(any(), any())).willReturn((Optional.of(anyString())));
+        // when, then
         assertThatCode(() -> userService.signUp(request))
                 .isInstanceOf(NotValidEmailFormatException.class)
                 .hasFieldOrPropertyWithValue("httpStatus", HttpStatus.BAD_REQUEST)
@@ -91,8 +89,7 @@ public class UserServiceTest {
     void signUp_DuplicatedUserId_Fail() {
         // given
         UserSignUpServiceRequest request = createSignUpRequest("email@gmail.com");
-
-        when(userRepository.isDuplicatedUserId(request.getUserId())).thenReturn(true);
+        given(userRepository.isDuplicatedUserId(request.getUserId())).willReturn(true);
 
         // when, then
         assertThatCode(() -> userService.signUp(request))
