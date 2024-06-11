@@ -18,4 +18,9 @@ public class MockS3ImageStorage implements ImageStorage {
                      .map(image -> FileUtil.makeFileName(IMAGE_DIRECTORY, userId, image))
                      .collect(Collectors.toList());
     }
+
+    @Override
+    public void deleteImages(List<String> imageUrls) {
+        
+    }
 }
