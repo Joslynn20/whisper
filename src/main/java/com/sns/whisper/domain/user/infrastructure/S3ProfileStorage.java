@@ -28,6 +28,7 @@ public class S3ProfileStorage implements ProfileStorage {
     private final S3Client s3Client;
     private static final String PROFILE_DIRECTORY = "user";
     private static final String BASIC_PROFILE = "basic_profile.png";
+    private static String BASIC_PROFILE_URL;
 
 
     @Value("${whisper.aws.s3.bucket}")
@@ -41,7 +42,7 @@ public class S3ProfileStorage implements ProfileStorage {
     public Optional<String> store(MultipartFile image, String userId) {
 
         if (Objects.isNull(image) || image.isEmpty()) {
-            return Optional.of(makeBasicProfile());
+            return Optional.of(getBasicProfile());
         }
 
         String key = FileUtil.makeFileName(PROFILE_DIRECTORY, userId, image);
@@ -70,7 +71,7 @@ public class S3ProfileStorage implements ProfileStorage {
 
     @Override
     public void deleteImage(String imageUrl) {
-        if (imageUrl == null) {
+        if (imageUrl == null || imageUrl.equals(getBasicProfile())) {
             return;
         }
 
@@ -83,11 +84,14 @@ public class S3ProfileStorage implements ProfileStorage {
 
     }
 
-    private String makeBasicProfile() {
-        return new StringBuilder().append(baseUrl)
-                                  .append(PROFILE_DIRECTORY)
-                                  .append(BASIC_PROFILE)
-                                  .toString();
+    private String getBasicProfile() {
+        if (BASIC_PROFILE_URL == null || BASIC_PROFILE_URL.isBlank()) {
+            BASIC_PROFILE_URL = new StringBuilder().append(baseUrl)
+                                                   .append(PROFILE_DIRECTORY)
+                                                   .append(BASIC_PROFILE)
+                                                   .toString();
+        }
+        return BASIC_PROFILE_URL;
     }
 
 }
