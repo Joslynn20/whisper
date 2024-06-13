@@ -2,14 +2,15 @@ package com.sns.whisper.domain.user.application;
 
 import com.sns.whisper.domain.user.application.dto.request.UserSignUpServiceRequest;
 import com.sns.whisper.domain.user.application.dto.response.UserResponse;
-import com.sns.whisper.domain.user.application.session.SessionManager;
 import com.sns.whisper.domain.user.domain.User;
 import com.sns.whisper.domain.user.domain.respository.ProfileStorage;
 import com.sns.whisper.domain.user.domain.respository.UserRepository;
+import com.sns.whisper.event.user.SignUpRollbackEvent;
 import com.sns.whisper.exception.user.DuplicatedUserIdException;
 import com.sns.whisper.exception.user.FileUploadException;
 import com.sns.whisper.global.common.PasswordEncryptor;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,7 +21,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final ProfileStorage profileStorage;
-    private final SessionManager sessionManager;
+    private final ApplicationEventPublisher eventPublisher;
 
     private static final String USER_ID = "USER_ID";
 
@@ -32,6 +33,8 @@ public class UserService {
         }
 
         User user = createUser(request);
+
+        eventPublisher.publishEvent(new SignUpRollbackEvent(user));
 
         User savedUser = userRepository.save(user);
 

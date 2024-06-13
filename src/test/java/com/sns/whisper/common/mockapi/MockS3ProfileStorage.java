@@ -22,6 +22,11 @@ public class MockS3ProfileStorage implements ProfileStorage {
         return Optional.of(PROFILE_DIRECTORY + image.getOriginalFilename());
     }
 
+    @Override
+    public void deleteImage(String imageUrl) {
+
+    }
+
     private String makeBasicProfile() {
         return new StringBuilder().append(PROFILE_DIRECTORY)
                                   .append(BASIC_PROFILE)
