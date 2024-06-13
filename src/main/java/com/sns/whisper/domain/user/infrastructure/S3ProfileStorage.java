@@ -16,6 +16,7 @@ import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.core.exception.SdkClientException;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.GetUrlRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
@@ -65,6 +66,21 @@ public class S3ProfileStorage implements ProfileStorage {
         } catch (AwsServiceException | SdkClientException | IOException e) {
             throw new FileUploadException();
         }
+    }
+
+    @Override
+    public void deleteImage(String imageUrl) {
+        if (imageUrl == null) {
+            return;
+        }
+
+        String key = imageUrl.substring(baseUrl.length());
+
+        s3Client.deleteObject(DeleteObjectRequest.builder()
+                                                 .bucket(bucket)
+                                                 .key(key)
+                                                 .build());
+
     }
 
     private String makeBasicProfile() {
