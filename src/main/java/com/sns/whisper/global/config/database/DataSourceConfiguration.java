@@ -11,6 +11,7 @@ import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy;
@@ -82,6 +83,7 @@ public class DataSourceConfiguration {
 
     //     실제 쿼리 실행 시 실제 사용할 DataSource의 Connection 획득
     @Bean
+    @Primary
     public DataSource lazyRoutingDataSource() {
         return new LazyConnectionDataSourceProxy(routingDataSource());
     }
