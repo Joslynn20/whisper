@@ -51,6 +51,10 @@ public class Post {
         return id;
     }
 
+    public List<String> getImageUrls() {
+        return images.getImageUrls();
+    }
+
     public static Builder builder() {
         return new Builder();
     }

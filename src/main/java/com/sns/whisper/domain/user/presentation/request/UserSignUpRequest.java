@@ -53,6 +53,7 @@ public class UserSignUpRequest {
         return UserSignUpServiceRequest.builder()
                                        .userId(userId)
                                        .password(password)
+                                       .email(email)
                                        .birth(birth)
                                        .profileImage(profileImage)
                                        .profileMessage(profileMessage)

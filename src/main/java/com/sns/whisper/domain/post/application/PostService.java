@@ -6,9 +6,11 @@ import com.sns.whisper.domain.post.domain.repository.ImageStorage;
 import com.sns.whisper.domain.post.domain.repository.PostRepository;
 import com.sns.whisper.domain.user.domain.User;
 import com.sns.whisper.domain.user.domain.respository.UserRepository;
+import com.sns.whisper.event.post.UploadRollbackEvent;
 import com.sns.whisper.exception.post.NotFoundUserException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,9 +22,14 @@ public class PostService {
     private final UserRepository userRepository;
     private final PostRepository postRepository;
     private final ImageStorage imageStorage;
+    private final ApplicationEventPublisher eventPublisher;
+
 
     public Long uploadPost(PostUploadServiceRequest serviceRequest) {
         Post post = createPost(serviceRequest);
+
+        eventPublisher.publishEvent(new UploadRollbackEvent(post));
+
         return postRepository.save(post)
                              .getId();
     }
