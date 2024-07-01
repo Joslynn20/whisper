@@ -4,10 +4,10 @@ package com.sns.whisper.unit.user.application;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import com.sns.whisper.common.factory.UserFactory;
 import com.sns.whisper.common.mockapi.MockUserSessionManager;
@@ -47,7 +47,7 @@ public class LoginServiceTest {
         String password = "password1234";
 
         User savedUser = UserFactory.createBasicUser(userId, password);
-        when(userRepository.findUserByUserId(userId)).thenReturn(Optional.of(savedUser));
+        given(userRepository.findUserByUserId(userId)).willReturn(Optional.of(savedUser));
 
         //when
         loginService.login(userId, password);
@@ -89,7 +89,7 @@ public class LoginServiceTest {
 
         User savedUser = UserFactory.createBasicUser(userId, savedPassword);
 
-        when(userRepository.findUserByUserId(userId)).thenReturn(Optional.of(savedUser));
+        given(userRepository.findUserByUserId(userId)).willReturn(Optional.of(savedUser));
 
         //when
         assertThatCode(() -> loginService.login(userId, password))

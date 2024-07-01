@@ -4,10 +4,10 @@ import static java.util.Objects.requireNonNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -39,7 +39,7 @@ public class PostControllerTest extends ControllerTest {
         MockMultipartFile image2 = new MockMultipartFile("images",
                 "image2.png", "image/png", "images".getBytes());
 
-        when(loginService.getCurrentUserId()).thenReturn("testId");
+        given(loginService.getCurrentUserId()).willReturn("testId");
 
         //when, then
         mockMvc.perform(multipart(HttpMethod.POST, "/api/posts").file(image1)

@@ -1,6 +1,7 @@
 package com.sns.whisper.common.mockapi;
 
 import com.sns.whisper.domain.user.application.session.SessionManager;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.context.annotation.Profile;
 import org.springframework.mock.web.MockHttpSession;
 
@@ -8,7 +9,7 @@ import org.springframework.mock.web.MockHttpSession;
 public class MockUserSessionManager implements SessionManager {
 
     private static final String USER_SESSION_KEY = "ACCESS_USER";
-    private final MockHttpSession session;
+    private final HttpSession session;
 
     public MockUserSessionManager() {
         this.session = new MockHttpSession();
