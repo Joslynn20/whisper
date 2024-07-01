@@ -27,6 +27,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
@@ -45,6 +46,9 @@ public class PostServiceTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private ApplicationEventPublisher eventPublisher;
 
 
     @Test
@@ -92,7 +96,7 @@ public class PostServiceTest {
                                                        .hasFieldOrPropertyWithValue("httpStatus",
                                                                HttpStatus.NOT_FOUND)
                                                        .hasMessage("유효하지 않은 회원입니다.");
-        
+
     }
 
     private PostUploadServiceRequest createRequest() {
