@@ -38,8 +38,7 @@ public class PostService {
     }
 
     private Post createPost(PostUploadServiceRequest serviceRequest) {
-        User user = userRepository.findUserByUserId(serviceRequest.getUserId())
-                                  .orElseThrow(NotFoundUserException::new);
+        User user = findUserByUserId(serviceRequest.getUserId());
 
         List<String> imageUrls = imageStorage.storeImages(serviceRequest.getImages(),
                 serviceRequest.getUserId());
@@ -52,8 +51,7 @@ public class PostService {
     }
 
     public void modifyPost(PostModifyServiceRequest serviceRequest) {
-        User user = userRepository.findUserByUserId(serviceRequest.getUserId())
-                                  .orElseThrow(NotFoundUserException::new);
+        User user = findUserByUserId(serviceRequest.getUserId());
 
         Post post = postRepository.findById(serviceRequest.getPostId())
                                   .orElseThrow(NotFoundPostException::new);
@@ -61,8 +59,13 @@ public class PostService {
         if (!post.isWrittenByUser(user)) {
             throw new PostNotBelongToUserException();
         }
-        
+
         post.updateContent(serviceRequest.getContent());
 
+    }
+
+    private User findUserByUserId(String userId) {
+        return userRepository.findUserByUserId(userId)
+                             .orElseThrow(NotFoundUserException::new);
     }
 }
