@@ -1,5 +1,6 @@
 package com.sns.whisper.domain.post.application;
 
+import com.sns.whisper.domain.post.application.dto.request.PostModifyServiceRequest;
 import com.sns.whisper.domain.post.application.dto.request.PostUploadServiceRequest;
 import com.sns.whisper.domain.post.domain.Post;
 import com.sns.whisper.domain.post.domain.repository.ImageStorage;
@@ -46,5 +47,8 @@ public class PostService {
                    .content(serviceRequest.getContent())
                    .images(imageUrls)
                    .build();
+    }
+
+    public void modifyPost(PostModifyServiceRequest serviceRequest) {
     }
 }
