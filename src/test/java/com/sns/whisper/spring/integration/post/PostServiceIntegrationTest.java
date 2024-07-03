@@ -5,11 +5,14 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 
 import com.sns.whisper.common.factory.UserFactory;
 import com.sns.whisper.domain.post.application.PostService;
+import com.sns.whisper.domain.post.application.dto.request.PostModifyServiceRequest;
 import com.sns.whisper.domain.post.application.dto.request.PostUploadServiceRequest;
+import com.sns.whisper.domain.post.domain.Post;
 import com.sns.whisper.domain.post.infrastructure.JPAPostRepository;
 import com.sns.whisper.domain.user.domain.User;
-import com.sns.whisper.domain.user.domain.respository.UserRepository;
+import com.sns.whisper.domain.user.infrastructure.JPAUserRepository;
 import com.sns.whisper.exception.post.NotFoundUserException;
+import com.sns.whisper.exception.post.PostNotBelongToUserException;
 import com.sns.whisper.spring.integration.IntegrationTest;
 import java.util.List;
 import org.junit.jupiter.api.AfterEach;
@@ -26,7 +29,7 @@ public class PostServiceIntegrationTest extends IntegrationTest {
     private PostService postService;
 
     @Autowired
-    private UserRepository userRepository;
+    private JPAUserRepository userRepository;
 
     @Autowired
     private JPAPostRepository postRepository;
@@ -34,6 +37,7 @@ public class PostServiceIntegrationTest extends IntegrationTest {
     @AfterEach
     public void tearDown() {
         postRepository.deleteAllInBatch();
+        userRepository.deleteAllInBatch();
     }
 
     @Test
@@ -41,7 +45,7 @@ public class PostServiceIntegrationTest extends IntegrationTest {
     void uploadPost_Valid_Success() throws Exception {
         //given
 
-        User user = UserFactory.user(1L, "testUser");
+        User user = UserFactory.createBasicUser("testUser", "password1234");
         userRepository.save(user);
 
         PostUploadServiceRequest serviceRequest = createServiceRequest();
@@ -67,6 +71,60 @@ public class PostServiceIntegrationTest extends IntegrationTest {
                                                                             "httpStatus",
                                                                             HttpStatus.NOT_FOUND)
                                                                     .hasMessage("유효하지 않은 회원입니다.");
+    }
+
+    @Test
+    @DisplayName("회원은 게시물을 수정할 수 있다.")
+    void modifyPost_ValidContentAndUser_Success() throws Exception {
+        //given
+        User user = UserFactory.createBasicUser("testId", "password1234");
+        userRepository.save(user);
+
+        Post post = Post.builder()
+                        .content("기존 게시물 내용")
+                        .user(user)
+                        .build();
+        postRepository.save(post);
+
+        //when
+        PostModifyServiceRequest serviceRequest = createModifyServiceRequest(post.getId(),
+                user.getUserId());
+
+        postService.modifyPost(serviceRequest);
+
+        //then
+        assertThat(post.getContent()).isEqualTo(serviceRequest.getContent());
+    }
+
+    @Test
+    @DisplayName("현재 회원이 작성하지 않은 게시물은 수정할 수 없다.")
+    void modifyPost_PostNotBelongToUser_403ExceptionThrown() throws Exception {
+        //given
+        User user = UserFactory.createBasicUser("testId", "password1234");
+        User currentUser = UserFactory.createBasicUser("currentUserId", "password12345");
+
+        userRepository.saveAll(List.of(user, currentUser));
+
+        Post post = Post.builder()
+                        .content("기존 게시물 내용")
+                        .user(user)
+                        .build();
+
+        postRepository.save(post);
+
+        //when
+        PostModifyServiceRequest serviceRequest = createModifyServiceRequest(
+                post.getId(), currentUser.getUserId());
+
+        assertThatCode(() -> postService.modifyPost(serviceRequest))
+                .isInstanceOf(PostNotBelongToUserException.class)
+                .hasFieldOrPropertyWithValue("httpStatus", HttpStatus.FORBIDDEN)
+                .hasMessage("게시물을 수정할 수 없습니다.");
+
+    }
+
+    private PostModifyServiceRequest createModifyServiceRequest(Long postId, String userId) {
+        return new PostModifyServiceRequest(postId, userId, "새로운 게시물 내용");
     }
 
 
