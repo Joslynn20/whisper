@@ -8,7 +8,9 @@ import com.sns.whisper.domain.post.domain.repository.PostRepository;
 import com.sns.whisper.domain.user.domain.User;
 import com.sns.whisper.domain.user.domain.respository.UserRepository;
 import com.sns.whisper.event.post.UploadRollbackEvent;
+import com.sns.whisper.exception.post.NotFoundPostException;
 import com.sns.whisper.exception.post.NotFoundUserException;
+import com.sns.whisper.exception.post.PostNotBelongToUserException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
@@ -50,5 +52,17 @@ public class PostService {
     }
 
     public void modifyPost(PostModifyServiceRequest serviceRequest) {
+        User user = userRepository.findUserByUserId(serviceRequest.getUserId())
+                                  .orElseThrow(NotFoundUserException::new);
+
+        Post post = postRepository.findById(serviceRequest.getPostId())
+                                  .orElseThrow(NotFoundPostException::new);
+
+        if (!post.isWrittenByUser(user)) {
+            throw new PostNotBelongToUserException();
+        }
+        
+        post.updateContent(serviceRequest.getContent());
+
     }
 }
