@@ -184,7 +184,7 @@ public class PostControllerTest extends ControllerTest {
         given(loginService.getCurrentUserId()).willReturn("testId");
 
         //when, then
-        mockMvc.perform(patch("/api/posts")
+        mockMvc.perform(patch("/api/posts/1")
                        .param("content", content))
                .andDo(print())
                .andExpect(status().isOk())
@@ -203,7 +203,7 @@ public class PostControllerTest extends ControllerTest {
         given(loginService.getCurrentUserId()).willReturn("testId");
 
         //when, then
-        mockMvc.perform(patch("/api/posts")
+        mockMvc.perform(patch("/api/posts/1")
                        .param("content", content)
                )
                .andDo(print())
