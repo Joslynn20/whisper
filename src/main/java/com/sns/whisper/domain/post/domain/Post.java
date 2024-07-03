@@ -55,6 +55,10 @@ public class Post {
         return images.getImageUrls();
     }
 
+    public boolean isWrittenByUser(User user) {
+        return this.user.equals(user);
+    }
+
     public static Builder builder() {
         return new Builder();
     }
