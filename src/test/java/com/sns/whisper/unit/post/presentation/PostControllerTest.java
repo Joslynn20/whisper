@@ -4,15 +4,17 @@ import static java.util.Objects.requireNonNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.sns.whisper.domain.post.application.dto.request.PostModifyServiceRequest;
 import com.sns.whisper.domain.post.application.dto.request.PostUploadServiceRequest;
 import com.sns.whisper.exception.post.NotAuthorizedUserException;
 import com.sns.whisper.unit.ControllerTest;
@@ -39,7 +41,7 @@ public class PostControllerTest extends ControllerTest {
         MockMultipartFile image2 = new MockMultipartFile("images",
                 "image2.png", "image/png", "images".getBytes());
 
-        when(loginService.getCurrentUserId()).thenReturn("testId");
+        given(loginService.getCurrentUserId()).willReturn("testId");
 
         //when, then
         mockMvc.perform(multipart(HttpMethod.POST, "/api/posts").file(image1)
@@ -169,6 +171,47 @@ public class PostControllerTest extends ControllerTest {
                        result.getResolvedException()));
 
         verify(postService, never()).uploadPost(any(PostUploadServiceRequest.class));
+
+    }
+
+    @Test
+    @DisplayName("500자 이하의 유효한 내용은 수정 가능하다.")
+    void modifyPost_ValidContent_Success() throws Exception {
+        //given
+
+        String content = "수정 게시물입니다.";
+
+        given(loginService.getCurrentUserId()).willReturn("testId");
+
+        //when, then
+        mockMvc.perform(patch("/api/posts/1")
+                       .param("content", content))
+               .andDo(print())
+               .andExpect(status().isOk())
+               .andExpect(jsonPath("$.message").value("게시물을 수정했습니다."));
+
+        verify(postService).modifyPost(any(PostModifyServiceRequest.class));
+
+    }
+
+    @Test
+    @DisplayName("게시물 내용은 500자를 초과할 수 없다.")
+    void modifyPost_ContentOver500_400Exception() throws Exception {
+        //given
+        String content = "a".repeat(501);
+
+        given(loginService.getCurrentUserId()).willReturn("testId");
+
+        //when, then
+        mockMvc.perform(patch("/api/posts/1")
+                       .param("content", content)
+               )
+               .andDo(print())
+               .andExpect(status().isBadRequest())
+               .andExpect(result -> assertInstanceOf(MethodArgumentNotValidException.class,
+                       result.getResolvedException()));
+
+        verify(postService, never()).modifyPost(any(PostModifyServiceRequest.class));
 
     }
 

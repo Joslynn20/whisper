@@ -51,8 +51,20 @@ public class Post {
         return id;
     }
 
+    public String getContent() {
+        return content;
+    }
+
     public List<String> getImageUrls() {
         return images.getImageUrls();
+    }
+
+    public void updateContent(String content) {
+        this.content = content;
+    }
+
+    public boolean isWrittenByUser(User user) {
+        return this.user.equals(user);
     }
 
     public static Builder builder() {

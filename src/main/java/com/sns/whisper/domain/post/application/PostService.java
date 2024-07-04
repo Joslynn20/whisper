@@ -1,5 +1,6 @@
 package com.sns.whisper.domain.post.application;
 
+import com.sns.whisper.domain.post.application.dto.request.PostModifyServiceRequest;
 import com.sns.whisper.domain.post.application.dto.request.PostUploadServiceRequest;
 import com.sns.whisper.domain.post.domain.Post;
 import com.sns.whisper.domain.post.domain.repository.ImageStorage;
@@ -7,7 +8,9 @@ import com.sns.whisper.domain.post.domain.repository.PostRepository;
 import com.sns.whisper.domain.user.domain.User;
 import com.sns.whisper.domain.user.domain.respository.UserRepository;
 import com.sns.whisper.event.post.UploadRollbackEvent;
+import com.sns.whisper.exception.post.NotFoundPostException;
 import com.sns.whisper.exception.post.NotFoundUserException;
+import com.sns.whisper.exception.post.PostNotBelongToUserException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
@@ -35,8 +38,7 @@ public class PostService {
     }
 
     private Post createPost(PostUploadServiceRequest serviceRequest) {
-        User user = userRepository.findUserByUserId(serviceRequest.getUserId())
-                                  .orElseThrow(NotFoundUserException::new);
+        User user = findUserByUserId(serviceRequest.getUserId());
 
         List<String> imageUrls = imageStorage.storeImages(serviceRequest.getImages(),
                 serviceRequest.getUserId());
@@ -46,5 +48,24 @@ public class PostService {
                    .content(serviceRequest.getContent())
                    .images(imageUrls)
                    .build();
+    }
+
+    public void modifyPost(PostModifyServiceRequest serviceRequest) {
+        User user = findUserByUserId(serviceRequest.getUserId());
+
+        Post post = postRepository.findById(serviceRequest.getPostId())
+                                  .orElseThrow(NotFoundPostException::new);
+
+        if (!post.isWrittenByUser(user)) {
+            throw new PostNotBelongToUserException();
+        }
+
+        post.updateContent(serviceRequest.getContent());
+
+    }
+
+    private User findUserByUserId(String userId) {
+        return userRepository.findUserByUserId(userId)
+                             .orElseThrow(NotFoundUserException::new);
     }
 }
