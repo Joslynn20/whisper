@@ -3,11 +3,13 @@ package com.sns.whisper.domain.post.presentation;
 import com.sns.whisper.domain.post.application.PostService;
 import com.sns.whisper.domain.post.presentation.request.PostModifyRequest;
 import com.sns.whisper.domain.post.presentation.request.PostUploadRequest;
-import com.sns.whisper.domain.user.application.LoginService;
-import com.sns.whisper.exception.post.NotAuthorizedUserException;
+import com.sns.whisper.global.aop.LoginCheck;
 import com.sns.whisper.global.dto.HttpResponseDto;
+import com.sns.whisper.global.resolver.AuthUser;
+import com.sns.whisper.global.resolver.CurrentUser;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -19,35 +21,29 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/posts")
+@Slf4j
 public class PostController {
 
     private final PostService postService;
 
-    private final LoginService loginService;
-
     @PostMapping
-    public ResponseEntity<?> uploadPost(@Valid PostUploadRequest postUploadRequest) {
+    @LoginCheck
+    public ResponseEntity<?> uploadPost(@Valid PostUploadRequest postUploadRequest, @CurrentUser
+    AuthUser authUser) {
 
-        String userId = loginService.getCurrentUserId();
-        if (userId == null) {
-            throw new NotAuthorizedUserException();
-        }
+        Long postId = postService.uploadPost(
+                postUploadRequest.toServiceRequest(authUser.getUserId()));
 
-        Long postId = postService.uploadPost(postUploadRequest.toServiceRequest(userId));
-
+        log.info(authUser.getUserId());
         return HttpResponseDto.okWithData(HttpStatus.CREATED, "게시물을 업로드했습니다.", postId);
     }
 
     @PatchMapping("/{postId}")
+    @LoginCheck
     public ResponseEntity<?> modifyPost(@PathVariable Long postId,
-            @Valid PostModifyRequest postModifyRequest) {
-        String userId = loginService.getCurrentUserId();
+            @Valid PostModifyRequest postModifyRequest, @CurrentUser AuthUser authUser) {
 
-        if (userId == null) {
-            throw new NotAuthorizedUserException();
-        }
-
-        postService.modifyPost(postModifyRequest.toServiceRequest(postId, userId));
+        postService.modifyPost(postModifyRequest.toServiceRequest(postId, authUser.getUserId()));
 
         return HttpResponseDto.ok(HttpStatus.OK, "게시물을 수정했습니다.");
     }
