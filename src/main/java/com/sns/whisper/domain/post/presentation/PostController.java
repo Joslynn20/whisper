@@ -9,7 +9,6 @@ import com.sns.whisper.global.resolver.AuthUser;
 import com.sns.whisper.global.resolver.CurrentUser;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -21,7 +20,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/posts")
-@Slf4j
 public class PostController {
 
     private final PostService postService;
@@ -34,7 +32,6 @@ public class PostController {
         Long postId = postService.uploadPost(
                 postUploadRequest.toServiceRequest(authUser.getUserId()));
 
-        log.info(authUser.getUserId());
         return HttpResponseDto.okWithData(HttpStatus.CREATED, "게시물을 업로드했습니다.", postId);
     }
 
