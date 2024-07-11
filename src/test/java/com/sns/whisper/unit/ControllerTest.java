@@ -12,7 +12,6 @@ import com.sns.whisper.domain.user.application.UserService;
 import com.sns.whisper.domain.user.presentation.UserController;
 import com.sns.whisper.global.aop.LoginCheckAspect;
 import com.sns.whisper.global.config.WebMvcConfiguration;
-import com.sns.whisper.global.resolver.AuthUserArgumentResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.aop.AopAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -39,9 +38,6 @@ public class ControllerTest {
 
     @MockBean
     protected PostService postService;
-
-    @MockBean
-    protected AuthUserArgumentResolver authUserArgumentResolver;
 
     @Autowired
     protected MockMvc mockMvc;
