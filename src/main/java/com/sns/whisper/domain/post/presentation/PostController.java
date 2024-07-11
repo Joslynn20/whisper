@@ -6,7 +6,7 @@ import com.sns.whisper.domain.post.presentation.request.PostUploadRequest;
 import com.sns.whisper.global.aop.LoginCheck;
 import com.sns.whisper.global.dto.HttpResponseDto;
 import com.sns.whisper.global.resolver.AuthUser;
-import com.sns.whisper.global.resolver.CurrentUser;
+import com.sns.whisper.global.resolver.Authenticated;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -26,7 +26,7 @@ public class PostController {
 
     @PostMapping
     @LoginCheck
-    public ResponseEntity<?> uploadPost(@Valid PostUploadRequest postUploadRequest, @CurrentUser
+    public ResponseEntity<?> uploadPost(@Valid PostUploadRequest postUploadRequest, @Authenticated
     AuthUser authUser) {
 
         Long postId = postService.uploadPost(
@@ -38,7 +38,7 @@ public class PostController {
     @PatchMapping("/{postId}")
     @LoginCheck
     public ResponseEntity<?> modifyPost(@PathVariable Long postId,
-            @Valid PostModifyRequest postModifyRequest, @CurrentUser AuthUser authUser) {
+            @Valid PostModifyRequest postModifyRequest, @Authenticated AuthUser authUser) {
 
         postService.modifyPost(postModifyRequest.toServiceRequest(postId, authUser.getUserId()));
 
