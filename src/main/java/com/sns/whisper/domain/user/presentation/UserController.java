@@ -44,4 +44,7 @@ public class UserController {
         return HttpResponseDto.ok(HttpStatus.OK, "로그아웃되었습니다.");
     }
 
+    public ResponseEntity<?> followUser() {
+        
+    }
 }
