@@ -11,7 +11,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 
-public class FollowingTest {
+public class FollowTest {
 
     @Test
     @DisplayName("회원은 자기 자신을 팔로우할 수 없다.")
