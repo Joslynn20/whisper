@@ -63,11 +63,11 @@ public class FollowersTest {
 
         Followers followers = new Followers(new ArrayList<>());
         Follow follow = new Follow(from, to);
-        
+
         followers.add(follow);
 
         //when
-        int size = followers.size();
+        int size = followers.count();
 
         // then
         assertThat(size).isEqualTo(1);
