@@ -1,6 +1,8 @@
 package com.sns.whisper.domain.user.application;
 
+import com.sns.whisper.domain.user.application.dto.request.FollowServiceRequest;
 import com.sns.whisper.domain.user.application.dto.request.UserSignUpServiceRequest;
+import com.sns.whisper.domain.user.application.dto.response.FollowServiceResponse;
 import com.sns.whisper.domain.user.application.dto.response.UserResponse;
 import com.sns.whisper.domain.user.domain.User;
 import com.sns.whisper.domain.user.domain.respository.ProfileStorage;
@@ -53,4 +55,7 @@ public class UserService {
                 request.getJoinedAt());
     }
 
+    public FollowServiceResponse followUser(FollowServiceRequest request) {
+        return null;
+    }
 }

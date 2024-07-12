@@ -1,8 +1,11 @@
 package com.sns.whisper.unit.user.presentation;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -10,7 +13,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.sns.whisper.domain.user.application.dto.request.FollowServiceRequest;
 import com.sns.whisper.domain.user.application.dto.request.UserSignUpServiceRequest;
+import com.sns.whisper.domain.user.application.dto.response.FollowServiceResponse;
 import com.sns.whisper.unit.ControllerTest;
 import java.time.LocalDate;
 import org.junit.jupiter.api.DisplayName;
@@ -20,6 +25,7 @@ import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.http.HttpMethod;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
@@ -135,6 +141,29 @@ public class UserControllerTest extends ControllerTest {
                .andExpect(status().isBadRequest());
 
         verify(loginService, never()).login(anyString(), anyString());
+    }
+
+    @Test
+    @DisplayName("회원은 다른 회원을 팔로우할 수 있다.")
+    void followUser_ValidUser_Success() throws Exception {
+        //given
+        FollowServiceResponse responseDto = new FollowServiceResponse(1, true);
+
+        given(loginService.getCurrentUserId()).willReturn("testId");
+        given(userService.followUser(any(FollowServiceRequest.class))).willReturn(responseDto);
+
+        //when
+        ResultActions perform = mockMvc.perform(post("/api/users/{userId}/followings", "testId"))
+                                       .andDo(print());
+
+        String body = perform.andExpect(status().isCreated())
+                             .andReturn()
+                             .getResponse()
+                             .getContentAsString();
+
+        //then
+        assertThat(body).contains(objectMapper.writeValueAsString(responseDto));
+        verify(userService, times(1)).followUser(any(FollowServiceRequest.class));
     }
 
 
