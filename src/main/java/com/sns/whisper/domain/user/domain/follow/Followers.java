@@ -40,7 +40,7 @@ public class Followers {
         followers.remove(follow);
     }
 
-    public int size() {
+    public int count() {
         return followers.size();
     }
 }

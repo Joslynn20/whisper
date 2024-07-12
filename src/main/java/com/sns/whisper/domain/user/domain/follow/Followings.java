@@ -50,7 +50,7 @@ public class Followings {
         return this.followings.contains(follow);
     }
 
-    public int size() {
+    public int count() {
         return followings.size();
     }
 }

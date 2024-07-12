@@ -136,7 +136,7 @@ public class FollowingsTest {
         followings.add(follow);
 
         //when
-        int size = followings.size();
+        int size = followings.count();
 
         // then
         AssertionsForClassTypes.assertThat(size)
