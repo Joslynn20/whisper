@@ -1,5 +1,7 @@
 package com.sns.whisper.domain.user.domain.follow;
 
+import com.sns.whisper.exception.user.DuplicatedFollowException;
+import com.sns.whisper.exception.user.InvalidFollowException;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.FetchType;
@@ -22,5 +24,23 @@ public class Followers {
 
     public Followers(List<Follow> followers) {
         this.followers = followers;
+    }
+
+    public void add(Follow follow) {
+        if (this.followers.contains(follow)) {
+            throw new DuplicatedFollowException();
+        }
+        followers.add(follow);
+    }
+
+    public void remove(Follow follow) {
+        if (!this.followers.contains(follow)) {
+            throw new InvalidFollowException();
+        }
+        followers.remove(follow);
+    }
+
+    public int size() {
+        return followers.size();
     }
 }
