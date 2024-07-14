@@ -160,6 +160,11 @@ public class User extends BaseEntity {
     }
 
 
+    public boolean isFollowing(User toUser) {
+        return this.followings.isFollowing(toUser);
+    }
+
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -176,4 +181,5 @@ public class User extends BaseEntity {
     public int hashCode() {
         return Objects.hash(id);
     }
+
 }
