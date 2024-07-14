@@ -21,75 +21,98 @@ import org.springframework.http.HttpStatus;
 
 class UserTest {
 
-    @DisplayName("회원 생성 시 처음 회원의 상태는 PENDING(가입 대기)이다.")
-    @Test
-    void create_ValidUser_Success() {
-        // given
-        String email = "test@gmail.com";
-        // when
-        User user = createUser(LocalDateTime.now(), email);
-        // then
-        assertThat(user.getStatus()).isEqualTo(UserStatus.PENDING);
+    @DisplayName("회원 생성 시")
+    @Nested
+    class Describe_create {
+
+        @DisplayName("유효한 회원 정보를 입력하면")
+        @Nested
+        class Context_ValidUser {
+
+            @DisplayName("처음 회원의 상태는 PENDING(가입 대기)이다.")
+            @Test
+            void create_ValidUser_Success() {
+                // given
+                String email = "test@gmail.com";
+                // when
+                User user = createUser(LocalDateTime.now(), email);
+                // then
+                assertThat(user.getStatus()).isEqualTo(UserStatus.PENDING);
+            }
+
+            @DisplayName("가입일자를 기록한다.")
+            @Test
+            void create_registerDateTime_Success() {
+                // given
+                LocalDateTime joinedAt = LocalDateTime.now();
+                String email = "test@gmail.com";
+
+                // when
+                User user = createUser(joinedAt, email);
+
+                // then
+                assertThat(user.getJoinedAt()).isEqualTo(joinedAt);
+            }
+
+        }
+
+        @Nested
+        @DisplayName("올바른 이메일을 입력하면")
+        class Context_ValidEmailFormat {
+
+            @Test
+            @DisplayName("회원을 생성할 수 있다.")
+            void create_ValidEmailFormat_Success() throws Exception {
+                // given
+                LocalDateTime joinedAt = LocalDateTime.now();
+                String email = "test@gmail.com";
+
+                //when, then
+                assertThatCode(
+                        () -> createUser(joinedAt, email)).doesNotThrowAnyException();
+            }
+        }
+
+        @DisplayName("잘못된 이메일을 입력하면")
+        @Nested
+        class Context_InValidEmail {
+
+            @Test
+            @DisplayName("회원을 생성할 수 없다.")
+            void create_inValidEmailFormat_ExceptionThrown() throws Exception {
+                // given
+                LocalDateTime joinedAt = LocalDateTime.now();
+                String email = "test@test";
+
+                //when, then
+                assertThatCode(
+                        () -> createUser(joinedAt, email)).isInstanceOf(
+                                                                  NotValidEmailFormatException.class)
+                                                          .hasFieldOrPropertyWithValue("httpStatus",
+                                                                  HttpStatus.BAD_REQUEST)
+                                                          .hasMessage("잘못된 형식의 이메일입니다.");
+            }
+
+            @Test
+            @DisplayName("Gmail 계정이 아닌 이메일을 입력할 수 없다.")
+            void create_inValidEmailAccount_ExceptionThrown() throws Exception {
+                //given
+
+                LocalDateTime joinedAt = LocalDateTime.now();
+                String email = "test@naver.com";
+
+                //when, then
+                assertThatCode(
+                        () -> createUser(joinedAt, email)).isInstanceOf(
+                                                                  NotValidEmailFormatException.class)
+                                                          .hasFieldOrPropertyWithValue("httpStatus",
+                                                                  HttpStatus.BAD_REQUEST)
+                                                          .hasMessage("잘못된 형식의 이메일입니다.");
+            }
+        }
+
     }
-
-    @DisplayName("회원 생성 시 가입일자를 기록한다.")
-    @Test
-    void create_registerDateTime_Success() {
-        // given
-        LocalDateTime joinedAt = LocalDateTime.now();
-        String email = "test@gmail.com";
-
-        // when
-        User user = createUser(joinedAt, email);
-
-        // then
-        assertThat(user.getJoinedAt()).isEqualTo(joinedAt);
-    }
-
-
-    @Test
-    @DisplayName("올바른 형식의 이메일을 입력하면, 회원을 생성할 수 있다")
-    void create_ValidEmailFormat_Success() throws Exception {
-        // given
-        LocalDateTime joinedAt = LocalDateTime.now();
-        String email = "test@gmail.com";
-
-        //when, then
-        assertThatCode(
-                () -> createUser(joinedAt, email)).doesNotThrowAnyException();
-    }
-
-    @Test
-    @DisplayName("잘못된 형식의 이메일을 입력할 수 없다.")
-    void create_inValidEmailFormat_ExceptionThrown() throws Exception {
-        // given
-        LocalDateTime joinedAt = LocalDateTime.now();
-        String email = "test@test";
-
-        //when, then
-        assertThatCode(
-                () -> createUser(joinedAt, email)).isInstanceOf(NotValidEmailFormatException.class)
-                                                  .hasFieldOrPropertyWithValue("httpStatus",
-                                                          HttpStatus.BAD_REQUEST)
-                                                  .hasMessage("잘못된 형식의 이메일입니다.");
-    }
-
-    @Test
-    @DisplayName("Gmail 계정이 아닌 이메일을 입력할 수 없다.")
-    void create_inValidEmailAccount_ExceptionThrown() throws Exception {
-        //given
-
-        LocalDateTime joinedAt = LocalDateTime.now();
-        String email = "test@naver.com";
-
-        //when, then
-        assertThatCode(
-                () -> createUser(joinedAt, email)).isInstanceOf(NotValidEmailFormatException.class)
-                                                  .hasFieldOrPropertyWithValue("httpStatus",
-                                                          HttpStatus.BAD_REQUEST)
-                                                  .hasMessage("잘못된 형식의 이메일입니다.");
-    }
-
+    
     @DisplayName("Follow 메서드는")
     @Nested
     class Describe_follow {
