@@ -112,7 +112,7 @@ class UserTest {
         }
 
     }
-    
+
     @DisplayName("Follow 메서드는")
     @Nested
     class Describe_follow {
@@ -179,6 +179,29 @@ class UserTest {
                                                              SameFromToUserException.class)
                                                      .hasFieldOrPropertyWithValue("httpStatus",
                                                              HttpStatus.BAD_REQUEST);
+            }
+        }
+    }
+
+    @Nested
+    @DisplayName("isFollowing 메소드는")
+    class Describe_isFollowing {
+
+        @DisplayName("팔로우하고 있는 회원이면")
+        @Nested
+        class Context_FollowedUser {
+
+            @Test
+            @DisplayName("True를 반환한다.")
+            void isFollowing_FollowedUser_True() throws Exception {
+                //given
+                User from = UserFactory.user(1L, "testId");
+                User to = UserFactory.user(2L, "testId1");
+
+                from.follow(to);
+
+                //when, then
+                assertThat(from.isFollowing(to)).isTrue();
             }
         }
     }
