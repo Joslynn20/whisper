@@ -2,15 +2,23 @@ package com.sns.whisper.domain.user.presentation;
 
 import com.sns.whisper.domain.user.application.LoginService;
 import com.sns.whisper.domain.user.application.UserService;
+import com.sns.whisper.domain.user.application.dto.request.FollowServiceRequest;
 import com.sns.whisper.domain.user.presentation.request.UserSignUpRequest;
+import com.sns.whisper.domain.user.presentation.response.FollowResponse;
+import com.sns.whisper.global.aop.LoginCheck;
 import com.sns.whisper.global.dto.HttpResponseDto;
+import com.sns.whisper.global.resolver.AuthUser;
+import com.sns.whisper.global.resolver.Authenticated;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -44,4 +52,17 @@ public class UserController {
         return HttpResponseDto.ok(HttpStatus.OK, "로그아웃되었습니다.");
     }
 
+    @LoginCheck
+    @PostMapping("/{userId}/followings")
+    public ResponseEntity<?> followUser(@Authenticated AuthUser authUser,
+            @PathVariable String userId, @PageableDefault Pageable pageable) {
+
+        FollowServiceRequest serviceRequest = new FollowServiceRequest(authUser.getUserId(),
+                userId);
+
+        FollowResponse followResponse = FollowResponse.from(userService.followUser(serviceRequest));
+
+        return HttpResponseDto.okWithData(HttpStatus.CREATED, userId + "님을 팔로우했습니다.",
+                followResponse);
+    }
 }

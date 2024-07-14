@@ -1,6 +1,7 @@
 package com.sns.whisper.domain.user.domain.follow;
 
 import com.sns.whisper.domain.user.domain.User;
+import com.sns.whisper.exception.user.SameFromToUserException;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -10,8 +11,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
-import java.time.LocalDateTime;
-import org.springframework.data.annotation.CreatedDate;
+import java.util.Objects;
+import lombok.Getter;
 
 @Entity
 @Table(
@@ -20,6 +21,7 @@ import org.springframework.data.annotation.CreatedDate;
                 @UniqueConstraint(columnNames = {"from_user_id", "to_user_id"})
         }
 )
+@Getter
 public class Follow {
 
     @Id
@@ -36,17 +38,41 @@ public class Follow {
     @JoinColumn(name = "to_user_id")
     private User toUser;
 
-    @CreatedDate
-    private LocalDateTime followed_at;
 
     protected Follow() {
     }
 
-    public Follow(Long id, User fromUser, User toUser, LocalDateTime followed_at) {
-        this.id = id;
+    public Follow(User fromUser, User toUser) {
+        validateDifferentUsers(fromUser, toUser);
         this.fromUser = fromUser;
         this.toUser = toUser;
-        this.followed_at = followed_at;
     }
 
+    private void validateDifferentUsers(User fromUser, User toUser) {
+        if (fromUser.equals(toUser)) {
+            throw new SameFromToUserException();
+        }
+    }
+
+    public boolean isFollowing(User toUser) {
+        return this.toUser.equals(toUser);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Follow follow = (Follow) o;
+        return Objects.equals(fromUser, follow.getFromUser()) && Objects.equals(toUser,
+                follow.getToUser());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(fromUser, toUser);
+    }
 }

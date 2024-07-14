@@ -1,6 +1,7 @@
 package com.sns.whisper.domain.user.domain;
 
 import com.sns.whisper.domain.post.domain.Posts;
+import com.sns.whisper.domain.user.domain.follow.Follow;
 import com.sns.whisper.domain.user.domain.follow.Followers;
 import com.sns.whisper.domain.user.domain.follow.Followings;
 import com.sns.whisper.domain.user.domain.profile.BasicProfile;
@@ -81,18 +82,17 @@ public class User extends BaseEntity {
     public static User create(String userId, String password, String email, LocalDate birth,
             String profileImage,
             String profileMessage, LocalDateTime joinedAt) {
-        return User.builder()
-                   .basicProfile(BasicProfile.builder()
-                                             .userId(userId)
-                                             .password(password)
-                                             .birth(birth)
-                                             .profileImage(profileImage)
-                                             .profileMessage(profileMessage)
-                                             .joinedAt(joinedAt)
-                                             .build())
-                   .email(new Email(email))
-                   .status(UserStatus.PENDING)
-                   .build();
+
+        BasicProfile basicProfile = BasicProfile.builder()
+                                                .userId(userId)
+                                                .password(password)
+                                                .birth(birth)
+                                                .profileImage(profileImage)
+                                                .profileMessage(profileMessage)
+                                                .joinedAt(joinedAt)
+                                                .build();
+
+        return new User(null, basicProfile, new Email(email), UserStatus.PENDING);
     }
 
     public Long getId() {
@@ -144,6 +144,25 @@ public class User extends BaseEntity {
         return posts;
     }
 
+    public int getFollowerCount() {
+        return followers.count();
+    }
+
+    public int getFollowingCount() {
+        return followings.count();
+    }
+
+    public void follow(User toUser) {
+        Follow follow = new Follow(this, toUser);
+        this.followings.add(follow);
+        toUser.followers.add(follow);
+    }
+
+
+    public boolean isFollowing(User toUser) {
+        return this.followings.isFollowing(toUser);
+    }
+
 
     @Override
     public boolean equals(Object o) {
@@ -161,4 +180,5 @@ public class User extends BaseEntity {
     public int hashCode() {
         return Objects.hash(id);
     }
+
 }
