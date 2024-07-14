@@ -1,6 +1,7 @@
 package com.sns.whisper.domain.user.domain;
 
 import com.sns.whisper.domain.post.domain.Posts;
+import com.sns.whisper.domain.user.domain.follow.Follow;
 import com.sns.whisper.domain.user.domain.follow.Followers;
 import com.sns.whisper.domain.user.domain.follow.Followings;
 import com.sns.whisper.domain.user.domain.profile.BasicProfile;
@@ -142,6 +143,20 @@ public class User extends BaseEntity {
 
     public Posts getPosts() {
         return posts;
+    }
+
+    public int getFollowerCount() {
+        return followers.count();
+    }
+
+    public int getFollowingCount() {
+        return followings.count();
+    }
+
+    public void follow(User toUser) {
+        Follow follow = new Follow(this, toUser);
+        this.followings.add(follow);
+        toUser.followers.add(follow);
     }
 
 

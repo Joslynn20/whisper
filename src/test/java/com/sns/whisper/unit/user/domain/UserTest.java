@@ -3,12 +3,19 @@ package com.sns.whisper.unit.user.domain;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 
+import com.sns.whisper.common.factory.UserFactory;
 import com.sns.whisper.domain.user.domain.User;
+import com.sns.whisper.domain.user.domain.follow.Follow;
+import com.sns.whisper.domain.user.domain.follow.Followings;
 import com.sns.whisper.domain.user.domain.profile.UserStatus;
+import com.sns.whisper.exception.user.DuplicatedFollowException;
 import com.sns.whisper.exception.user.NotValidEmailFormatException;
+import com.sns.whisper.exception.user.SameFromToUserException;
+import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 
@@ -81,6 +88,76 @@ class UserTest {
                                                   .hasFieldOrPropertyWithValue("httpStatus",
                                                           HttpStatus.BAD_REQUEST)
                                                   .hasMessage("잘못된 형식의 이메일입니다.");
+    }
+
+    @DisplayName("Follow 메서드는")
+    @Nested
+    class Describe_follow {
+
+        @DisplayName("아직 팔로우하지 않은 타 회원에 대해서")
+        @Nested
+        class Context_ValidOtherUser {
+
+            @Test
+            @DisplayName("팔로우에 성공한다.")
+            void follow_ValidUser_Success() throws Exception {
+                //given
+                User from = UserFactory.user(1L, "testId");
+                User to = UserFactory.user(2L, "testId2");
+
+                //when
+                from.follow(to);
+
+                Field followingsField = User.class.getDeclaredField("followings");
+                followingsField.setAccessible(true);
+                Followings followings = (Followings) followingsField.get(from);
+
+                //then
+                assertThat(followings.contains(new Follow(from, to))).isTrue();
+                assertThat(from.getFollowingCount()).isEqualTo(1);
+                assertThat(to.getFollowerCount()).isEqualTo(1);
+            }
+        }
+
+        @DisplayName("이미 팔로우한 타 회원에 대해서")
+        @Nested
+        class Context_FollowedUser {
+
+            @Test
+            @DisplayName("팔로우할 수 없다.")
+            void follow_FollowedUser_ExceptionThrown() throws Exception {
+                //given
+                User from = UserFactory.user(1L, "testId");
+                User to = UserFactory.user(2L, "testId2");
+                from.follow(to);
+
+                //when, then
+                User toUser = UserFactory.user(2L, "testId2");
+                assertThatCode(() -> from.follow(toUser)).isInstanceOf(
+                                                                 DuplicatedFollowException.class)
+                                                         .hasFieldOrPropertyWithValue("httpStatus",
+                                                                 HttpStatus.BAD_REQUEST);
+            }
+        }
+
+        @DisplayName("자기 자신에 대해서")
+        @Nested
+        class Context_MySelf {
+
+            @Test
+            @DisplayName("팔로우할 수 없다.")
+            void follow_MySelf_ExceptionThrown() throws Exception {
+                //given
+                User from = UserFactory.user(1L, "testId");
+                User to = UserFactory.user(1L, "testId");
+
+                //when, then
+                assertThatCode(() -> from.follow(to)).isInstanceOf(
+                                                             SameFromToUserException.class)
+                                                     .hasFieldOrPropertyWithValue("httpStatus",
+                                                             HttpStatus.BAD_REQUEST);
+            }
+        }
     }
 
     private User createUser(LocalDateTime joinedAt, String email) {
