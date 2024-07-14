@@ -82,18 +82,17 @@ public class User extends BaseEntity {
     public static User create(String userId, String password, String email, LocalDate birth,
             String profileImage,
             String profileMessage, LocalDateTime joinedAt) {
-        return User.builder()
-                   .basicProfile(BasicProfile.builder()
-                                             .userId(userId)
-                                             .password(password)
-                                             .birth(birth)
-                                             .profileImage(profileImage)
-                                             .profileMessage(profileMessage)
-                                             .joinedAt(joinedAt)
-                                             .build())
-                   .email(new Email(email))
-                   .status(UserStatus.PENDING)
-                   .build();
+
+        BasicProfile basicProfile = BasicProfile.builder()
+                                                .userId(userId)
+                                                .password(password)
+                                                .birth(birth)
+                                                .profileImage(profileImage)
+                                                .profileMessage(profileMessage)
+                                                .joinedAt(joinedAt)
+                                                .build();
+
+        return new User(null, basicProfile, new Email(email), UserStatus.PENDING);
     }
 
     public Long getId() {
