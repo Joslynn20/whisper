@@ -68,8 +68,13 @@ public class UserService {
                                     .build();
     }
 
+    public FollowServiceResponse unfollowUser(FollowServiceRequest serviceRequest) {
+        return null;
+    }
+
     private User findUserByUserId(String userId) {
         return userRepository.findUserByUserId(userId)
                              .orElseThrow(InvalidUserException::new);
     }
+
 }
