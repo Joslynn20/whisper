@@ -7,6 +7,15 @@ import java.time.LocalDateTime;
 
 public class UserFactory {
 
+    public static User createBasicUser(String userId) {
+
+        String encryptPassword = PasswordEncryptor.encrypt("password1234");
+
+        return User.create(userId, encryptPassword, "email@gmail.com", LocalDate.of(1998, 11, 12),
+                "basic_profile.png",
+                "프로필 메세지", LocalDateTime.now());
+    }
+
     public static User createBasicUser(String userId, String password) {
 
         String encryptPassword = PasswordEncryptor.encrypt(password);
