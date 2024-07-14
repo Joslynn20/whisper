@@ -1,7 +1,7 @@
 package com.sns.whisper.common.mockapi;
 
 import com.sns.whisper.global.resolver.AuthUser;
-import com.sns.whisper.global.resolver.CurrentUser;
+import com.sns.whisper.global.resolver.Authenticated;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.MethodParameter;
 import org.springframework.web.bind.support.WebDataBinderFactory;
@@ -15,7 +15,7 @@ public class MockAuthUserArgumentResolver implements HandlerMethodArgumentResolv
 
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
-        return parameter.hasParameterAnnotation(CurrentUser.class);
+        return parameter.hasParameterAnnotation(Authenticated.class);
     }
 
     @Override

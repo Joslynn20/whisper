@@ -1,6 +1,8 @@
 package com.sns.whisper.domain.user.application;
 
+import com.sns.whisper.domain.user.application.dto.request.FollowServiceRequest;
 import com.sns.whisper.domain.user.application.dto.request.UserSignUpServiceRequest;
+import com.sns.whisper.domain.user.application.dto.response.FollowServiceResponse;
 import com.sns.whisper.domain.user.application.dto.response.UserResponse;
 import com.sns.whisper.domain.user.domain.User;
 import com.sns.whisper.domain.user.domain.respository.ProfileStorage;
@@ -8,6 +10,7 @@ import com.sns.whisper.domain.user.domain.respository.UserRepository;
 import com.sns.whisper.event.user.SignUpRollbackEvent;
 import com.sns.whisper.exception.user.DuplicatedUserIdException;
 import com.sns.whisper.exception.user.FileUploadException;
+import com.sns.whisper.exception.user.InvalidUserException;
 import com.sns.whisper.global.common.PasswordEncryptor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
@@ -53,4 +56,20 @@ public class UserService {
                 request.getJoinedAt());
     }
 
+    public FollowServiceResponse followUser(FollowServiceRequest request) {
+        User fromUser = findUserByUserId(request.getFromUser());
+        User toUser = findUserByUserId(request.getToUser());
+
+        fromUser.follow(toUser);
+
+        return FollowServiceResponse.builder()
+                                    .following(fromUser.isFollowing(toUser))
+                                    .followerCount(toUser.getFollowerCount())
+                                    .build();
+    }
+
+    private User findUserByUserId(String userId) {
+        return userRepository.findUserByUserId(userId)
+                             .orElseThrow(InvalidUserException::new);
+    }
 }
