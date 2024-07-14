@@ -10,6 +10,7 @@ import com.sns.whisper.domain.user.domain.respository.UserRepository;
 import com.sns.whisper.event.user.SignUpRollbackEvent;
 import com.sns.whisper.exception.user.DuplicatedUserIdException;
 import com.sns.whisper.exception.user.FileUploadException;
+import com.sns.whisper.exception.user.InvalidUserException;
 import com.sns.whisper.global.common.PasswordEncryptor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
@@ -56,6 +57,19 @@ public class UserService {
     }
 
     public FollowServiceResponse followUser(FollowServiceRequest request) {
-        return null;
+        User fromUser = findUserByUserId(request.getFromUser());
+        User toUser = findUserByUserId(request.getToUser());
+
+        fromUser.follow(toUser);
+
+        return FollowServiceResponse.builder()
+                                    .following(fromUser.isFollowing(toUser))
+                                    .followerCount(toUser.getFollowerCount())
+                                    .build();
+    }
+
+    private User findUserByUserId(String userId) {
+        return userRepository.findUserByUserId(userId)
+                             .orElseThrow(InvalidUserException::new);
     }
 }
