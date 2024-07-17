@@ -13,8 +13,6 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -55,7 +53,7 @@ public class UserController {
     @LoginCheck
     @PostMapping("/{userId}/followings")
     public ResponseEntity<?> followUser(@Authenticated AuthUser authUser,
-            @PathVariable String userId, @PageableDefault Pageable pageable) {
+            @PathVariable String userId) {
 
         FollowServiceRequest serviceRequest = new FollowServiceRequest(authUser.getUserId(),
                 userId);
@@ -63,6 +61,21 @@ public class UserController {
         FollowResponse followResponse = FollowResponse.from(userService.followUser(serviceRequest));
 
         return HttpResponseDto.okWithData(HttpStatus.CREATED, userId + "님을 팔로우했습니다.",
+                followResponse);
+    }
+
+    @LoginCheck
+    @DeleteMapping("/{userId}/followings")
+    public ResponseEntity<?> unfollowUser(@Authenticated AuthUser authUser,
+            @PathVariable String userId) {
+
+        FollowServiceRequest serviceRequest = new FollowServiceRequest(authUser.getUserId(),
+                userId);
+
+        FollowResponse followResponse = FollowResponse.from(
+                userService.unfollowUser(serviceRequest));
+
+        return HttpResponseDto.okWithData(HttpStatus.OK, userId + "님을 언팔로우했습니다.",
                 followResponse);
     }
 }

@@ -2,7 +2,7 @@ package com.sns.whisper.spring.integration.user;
 
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.sns.whisper.common.factory.UserFactory;
 import com.sns.whisper.domain.user.application.UserService;
@@ -15,6 +15,7 @@ import com.sns.whisper.domain.user.domain.profile.UserStatus;
 import com.sns.whisper.domain.user.infrastructure.JPAUserRepository;
 import com.sns.whisper.exception.user.DuplicatedFollowException;
 import com.sns.whisper.exception.user.DuplicatedUserIdException;
+import com.sns.whisper.exception.user.InvalidFollowException;
 import com.sns.whisper.exception.user.InvalidUserException;
 import com.sns.whisper.exception.user.SameFromToUserException;
 import com.sns.whisper.spring.integration.IntegrationTest;
@@ -94,11 +95,12 @@ public class UserServiceIntegrationTest extends IntegrationTest {
                                                                    .joinedAt(LocalDateTime.now())
                                                                    .build();
         //when, then
-        assertThatCode(() -> userService.signUp(request)).isInstanceOf(
-                                                                 DuplicatedUserIdException.class)
-                                                         .hasFieldOrPropertyWithValue("httpStatus",
-                                                                 HttpStatus.BAD_REQUEST)
-                                                         .hasMessage("중복된 아이디입니다.");
+        assertThatThrownBy(() -> userService.signUp(request)).isInstanceOf(
+                                                                     DuplicatedUserIdException.class)
+                                                             .hasFieldOrPropertyWithValue(
+                                                                     "httpStatus",
+                                                                     HttpStatus.BAD_REQUEST)
+                                                             .hasMessage("중복된 아이디입니다.");
     }
 
 
@@ -116,7 +118,7 @@ public class UserServiceIntegrationTest extends IntegrationTest {
         FollowServiceRequest followServiceRequest = new FollowServiceRequest(fromId, toId);
 
         //when, then
-        assertThatCode(() -> userService.followUser(followServiceRequest))
+        assertThatThrownBy(() -> userService.followUser(followServiceRequest))
                 .isInstanceOf(InvalidUserException.class)
                 .hasFieldOrPropertyWithValue("httpStatus", HttpStatus.BAD_REQUEST);
     }
@@ -134,7 +136,7 @@ public class UserServiceIntegrationTest extends IntegrationTest {
         FollowServiceRequest followServiceRequest = new FollowServiceRequest(fromId, sameId);
 
         //when, then
-        assertThatCode(() -> userService.followUser(followServiceRequest))
+        assertThatThrownBy(() -> userService.followUser(followServiceRequest))
                 .isInstanceOf(SameFromToUserException.class)
                 .hasFieldOrPropertyWithValue("httpStatus", HttpStatus.BAD_REQUEST);
     }
@@ -157,7 +159,7 @@ public class UserServiceIntegrationTest extends IntegrationTest {
         userService.followUser(followServiceRequest);
 
         //when, then
-        assertThatCode(() -> userService.followUser(followServiceRequest))
+        assertThatThrownBy(() -> userService.followUser(followServiceRequest))
                 .isInstanceOf(DuplicatedFollowException.class)
                 .hasFieldOrPropertyWithValue("httpStatus", HttpStatus.BAD_REQUEST);
     }
@@ -183,6 +185,95 @@ public class UserServiceIntegrationTest extends IntegrationTest {
         // then
         assertThat(followResponse).extracting("followerCount", "following")
                                   .contains(1, true);
+    }
+
+    @Test
+    @DisplayName("회원은 존재하지 않는 회원을 언팔로우할 수 없다.")
+    void unfollowUser_NotExistedUser_400Exception() throws Exception {
+        //given
+        String fromId = "testId";
+        String toId = "testId1";
+
+        User fromUser = UserFactory.createBasicUser(fromId);
+
+        userRepository.save(fromUser);
+
+        FollowServiceRequest unfollowServiceRequest = new FollowServiceRequest(fromId, toId);
+
+        //when, then
+        assertThatThrownBy(() -> userService.unfollowUser(unfollowServiceRequest))
+                .isInstanceOf(InvalidUserException.class)
+                .hasFieldOrPropertyWithValue("httpStatus", HttpStatus.BAD_REQUEST);
+
+    }
+
+    @Test
+    @DisplayName("회원은 자기 자신을 언팔로우 할 수 없다.")
+    void unfollowUser_SameFromToUser_400Exception() throws Exception {
+        //given
+        String fromId = "testId";
+        String toId = "testId";
+
+        User fromUser = UserFactory.createBasicUser(fromId);
+
+        userRepository.save(fromUser);
+
+        FollowServiceRequest unfollowServiceRequest = new FollowServiceRequest(fromId, toId);
+
+        //when, then
+        assertThatThrownBy(() -> userService.unfollowUser(unfollowServiceRequest)).isInstanceOf(
+                                                                                          SameFromToUserException.class)
+                                                                                  .hasFieldOrPropertyWithValue(
+                                                                                          "httpStatus",
+                                                                                          HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    @DisplayName("회원은 팔로우하지 않은 회원에 대해 언팔로우 할 수 없다.")
+    void unfollowUser_NotFollowedUser_400Exception() throws Exception {
+        //given
+        String fromId = "testId";
+        String toId = "testId1";
+
+        User fromUser = UserFactory.createBasicUser(fromId);
+        User toUser = UserFactory.createBasicUser(toId);
+
+        userRepository.save(fromUser);
+        userRepository.save(toUser);
+
+        FollowServiceRequest unfollowServiceRequest = new FollowServiceRequest(fromId, toId);
+
+        //when, then
+        assertThatThrownBy(() -> userService.unfollowUser(unfollowServiceRequest)).isInstanceOf(
+                                                                                          InvalidFollowException.class)
+                                                                                  .hasFieldOrPropertyWithValue(
+                                                                                          "httpStatus",
+                                                                                          HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    @DisplayName("회원은 팔로우한 회원에 대해서 언팔로우할 수 있다.")
+    void unfollowUser_FollowedUser_Success() throws Exception {
+        //given
+        String fromId = "testId";
+        String toId = "testId1";
+
+        User fromUser = UserFactory.createBasicUser(fromId);
+        User toUser = UserFactory.createBasicUser(toId);
+
+        userRepository.save(fromUser);
+        userRepository.save(toUser);
+
+        fromUser.follow(toUser);
+
+        FollowServiceRequest unfollowServiceRequest = new FollowServiceRequest(fromId, toId);
+
+        //when
+        FollowServiceResponse unfollowResponse = userService.unfollowUser(unfollowServiceRequest);
+
+        // then
+        assertThat(unfollowResponse).extracting("followerCount", "following")
+                                    .contains(0, false);
     }
 
 }
