@@ -69,7 +69,15 @@ public class UserService {
     }
 
     public FollowServiceResponse unfollowUser(FollowServiceRequest serviceRequest) {
-        return null;
+        User fromUser = findUserByUserId(serviceRequest.getFromUser());
+        User toUser = findUserByUserId(serviceRequest.getToUser());
+
+        fromUser.unfollow(toUser);
+
+        return FollowServiceResponse.builder()
+                                    .following(fromUser.isFollowing(toUser))
+                                    .followerCount(toUser.getFollowerCount()).
+                                    build();
     }
 
     private User findUserByUserId(String userId) {
