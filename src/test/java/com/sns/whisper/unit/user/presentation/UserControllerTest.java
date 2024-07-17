@@ -7,6 +7,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -38,7 +39,7 @@ public class UserControllerTest extends ControllerTest {
         MultiValueMap<String, String> params = getParams();
 
         MockMultipartFile profileImage = new MockMultipartFile("profileImage",
-                "profileImage.png", "image/png", "profileImage".getBytes());
+                "profileImage.png", "image/png", "profileImage" .getBytes());
 
         //when, then
         mockMvc.perform(multipart(HttpMethod.POST, "/api/users").file(profileImage)
@@ -59,7 +60,7 @@ public class UserControllerTest extends ControllerTest {
         MultiValueMap<String, String> params = getParams();
 
         MockMultipartFile profileImage = new MockMultipartFile("profileImage",
-                file, "image/png", "profileImage.exe".getBytes());
+                file, "image/png", "profileImage.exe" .getBytes());
 
         //when, then
         mockMvc.perform(multipart(HttpMethod.POST, "/api/users").file(profileImage)
@@ -79,7 +80,7 @@ public class UserControllerTest extends ControllerTest {
         MultiValueMap<String, String> params = getParams();
 
         MockMultipartFile profileImage = new MockMultipartFile("profileImage",
-                "profileImage.png", contentType, "profileImage.exe".getBytes());
+                "profileImage.png", contentType, "profileImage.exe" .getBytes());
 
         //when, then
         mockMvc.perform(multipart(HttpMethod.POST, "/api/users").file(profileImage)
@@ -153,7 +154,7 @@ public class UserControllerTest extends ControllerTest {
         given(userService.followUser(any(FollowServiceRequest.class))).willReturn(responseDto);
 
         //when
-        ResultActions perform = mockMvc.perform(post("/api/users/{userId}/followings", "testId"))
+        ResultActions perform = mockMvc.perform(post("/api/users/{userId}/followings", "testId1"))
                                        .andDo(print());
 
         String body = perform.andExpect(status().isCreated())
@@ -164,6 +165,29 @@ public class UserControllerTest extends ControllerTest {
         //then
         assertThat(body).contains(objectMapper.writeValueAsString(responseDto));
         verify(userService, times(1)).followUser(any(FollowServiceRequest.class));
+    }
+
+    @Test
+    @DisplayName("회원은 다른 회원을 언팔로우할 수 있다.")
+    void unfollowUser_LoginUser_Success() throws Exception {
+        //given
+        FollowServiceResponse responseDto = new FollowServiceResponse(0, false);
+
+        given(loginService.getCurrentUserId()).willReturn("testId");
+        given(userService.unfollowUser(any(FollowServiceRequest.class))).willReturn(responseDto);
+
+        //when
+        ResultActions perform = mockMvc.perform(delete("/api/users/{userId}/followings", "testId1"))
+                                       .andDo(print());
+
+        String body = perform.andExpect(status().isOk())
+                             .andReturn()
+                             .getResponse()
+                             .getContentAsString();
+
+        //then
+        assertThat(body).contains(objectMapper.writeValueAsString(responseDto));
+        verify(userService, times(1)).unfollowUser(any(FollowServiceRequest.class));
     }
 
 

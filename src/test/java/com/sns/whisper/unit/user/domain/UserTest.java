@@ -2,6 +2,7 @@ package com.sns.whisper.unit.user.domain;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.sns.whisper.common.factory.UserFactory;
 import com.sns.whisper.domain.user.domain.User;
@@ -9,6 +10,7 @@ import com.sns.whisper.domain.user.domain.follow.Follow;
 import com.sns.whisper.domain.user.domain.follow.Followings;
 import com.sns.whisper.domain.user.domain.profile.UserStatus;
 import com.sns.whisper.exception.user.DuplicatedFollowException;
+import com.sns.whisper.exception.user.InvalidFollowException;
 import com.sns.whisper.exception.user.NotValidEmailFormatException;
 import com.sns.whisper.exception.user.SameFromToUserException;
 import java.lang.reflect.Field;
@@ -202,6 +204,77 @@ class UserTest {
 
                 //when, then
                 assertThat(from.isFollowing(to)).isTrue();
+            }
+        }
+    }
+
+    @DisplayName("unfollow 메서드는")
+    @Nested
+    class Describe_unfollow {
+
+        @DisplayName("팔로우한 회원에 대해서")
+        @Nested
+        class Context_FollowedUser {
+
+            @Test
+            @DisplayName("언팔로우할 수 있다.")
+            void unfollow_followedUser_Success() throws Exception {
+                //given
+                User fromUser = UserFactory.user(1L, "testId");
+                User toUser = UserFactory.user(2L, "testId1");
+
+                fromUser.follow(toUser);
+
+                //when
+                assertThatCode(() -> fromUser.unfollow(toUser)).doesNotThrowAnyException();
+
+                //then
+                assertThat(fromUser.isFollowing(toUser)).isFalse();
+                assertThat(fromUser.getFollowingCount()).isEqualTo(0);
+                assertThat(toUser.getFollowerCount()).isEqualTo(0);
+            }
+        }
+
+
+        @DisplayName("팔로우하지 않은 회원에 대해서")
+        @Nested
+        class Context_NotFollowedUser {
+
+            @Test
+            @DisplayName("언팔로우할 수 없다.")
+            void unfollow_NotFollowedUser_ExceptionThrown() throws Exception {
+                //given
+                User fromUser = UserFactory.user(1L, "testId");
+                User toUser = UserFactory.user(2L, "testId1");
+
+                //when, then
+                assertThatThrownBy(() -> fromUser.unfollow(toUser)).isInstanceOf(
+                                                                           InvalidFollowException.class)
+                                                                   .hasFieldOrPropertyWithValue(
+                                                                           "httpStatus",
+                                                                           HttpStatus.BAD_REQUEST);
+
+                assertThat(fromUser.isFollowing(toUser)).isFalse();
+
+            }
+        }
+
+        @DisplayName("자기 자신에 대해서")
+        @Nested
+        class Context_MySelf {
+
+            @Test
+            @DisplayName("언팔로우할 수 없다.")
+            void unfollow_MySelf_ExceptionThrown() throws Exception {
+                //given
+                User from = UserFactory.user(1L, "testId");
+                User to = UserFactory.user(1L, "testId");
+
+                //when, then
+                assertThatCode(() -> from.unfollow(to)).isInstanceOf(
+                                                               SameFromToUserException.class)
+                                                       .hasFieldOrPropertyWithValue("httpStatus",
+                                                               HttpStatus.BAD_REQUEST);
             }
         }
     }

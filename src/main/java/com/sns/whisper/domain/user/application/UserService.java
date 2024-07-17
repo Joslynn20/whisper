@@ -68,8 +68,21 @@ public class UserService {
                                     .build();
     }
 
+    public FollowServiceResponse unfollowUser(FollowServiceRequest serviceRequest) {
+        User fromUser = findUserByUserId(serviceRequest.getFromUser());
+        User toUser = findUserByUserId(serviceRequest.getToUser());
+
+        fromUser.unfollow(toUser);
+
+        return FollowServiceResponse.builder()
+                                    .following(fromUser.isFollowing(toUser))
+                                    .followerCount(toUser.getFollowerCount()).
+                                    build();
+    }
+
     private User findUserByUserId(String userId) {
         return userRepository.findUserByUserId(userId)
                              .orElseThrow(InvalidUserException::new);
     }
+
 }

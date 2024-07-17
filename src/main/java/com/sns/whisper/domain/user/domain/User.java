@@ -163,6 +163,12 @@ public class User extends BaseEntity {
         return this.followings.isFollowing(toUser);
     }
 
+    public void unfollow(User toUser) {
+        Follow follow = new Follow(this, toUser);
+        this.followings.remove(follow);
+        toUser.followers.remove(follow);
+    }
+
 
     @Override
     public boolean equals(Object o) {
