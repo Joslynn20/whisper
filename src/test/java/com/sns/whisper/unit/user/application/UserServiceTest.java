@@ -2,6 +2,7 @@ package com.sns.whisper.unit.user.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.any;
@@ -22,6 +23,7 @@ import com.sns.whisper.domain.user.domain.respository.ProfileStorage;
 import com.sns.whisper.domain.user.domain.respository.UserRepository;
 import com.sns.whisper.exception.user.DuplicatedFollowException;
 import com.sns.whisper.exception.user.DuplicatedUserIdException;
+import com.sns.whisper.exception.user.InvalidFollowException;
 import com.sns.whisper.exception.user.InvalidUserException;
 import com.sns.whisper.exception.user.NotValidEmailFormatException;
 import com.sns.whisper.exception.user.SameFromToUserException;
@@ -191,71 +193,229 @@ public class UserServiceTest {
                 verify(userRepository, times(2)).findUserByUserId(fromUser);
             }
 
-            @DisplayName("회원이 팔로우하지 않은 회원은")
-            @Nested
-            class Context_NotFollowedUser {
 
-                @Test
-                @DisplayName("팔로우할 수 있다.")
-                void followUser_NotFollowedUser_Success() throws Exception {
-                    //given
-                    String fromUser = "testId";
-                    String toUser = "testId1";
+        }
 
-                    User from = UserFactory.user(1L, "testId");
-                    User to = UserFactory.user(2L, "testId1");
+        @DisplayName("회원이 팔로우하지 않은 회원은")
+        @Nested
+        class Context_NotFollowedUser {
 
-                    FollowServiceRequest followServiceRequest = new FollowServiceRequest(fromUser,
-                            toUser);
+            @Test
+            @DisplayName("팔로우할 수 있다.")
+            void followUser_NotFollowedUser_Success() throws Exception {
+                //given
+                String fromUser = "testId";
+                String toUser = "testId1";
 
-                    given(userRepository.findUserByUserId(fromUser)).willReturn(Optional.of(from));
-                    given(userRepository.findUserByUserId(toUser)).willReturn(Optional.of(to));
+                User from = UserFactory.user(1L, "testId");
+                User to = UserFactory.user(2L, "testId1");
 
-                    //when
-                    FollowServiceResponse response = userService.followUser(followServiceRequest);
+                FollowServiceRequest followServiceRequest = new FollowServiceRequest(fromUser,
+                        toUser);
 
-                    // then
-                    assertThat(response.getFollowerCount()).isEqualTo(1);
-                    assertThat(response.isFollowing()).isTrue();
+                given(userRepository.findUserByUserId(fromUser)).willReturn(Optional.of(from));
+                given(userRepository.findUserByUserId(toUser)).willReturn(Optional.of(to));
 
-                    verify(userRepository, times(1)).findUserByUserId(fromUser);
-                    verify(userRepository, times(1)).findUserByUserId(toUser);
-                }
-            }
+                //when
+                FollowServiceResponse response = userService.followUser(followServiceRequest);
 
-            @DisplayName("회원이 이미 팔로우한 회원은")
-            @Nested
-            class Context_FollowedUser {
+                // then
+                assertThat(response.getFollowerCount()).isEqualTo(1);
+                assertThat(response.isFollowing()).isTrue();
 
-                @Test
-                @DisplayName("팔로우할 수 없다.")
-                void followUser_FollowedUser_400Exception() throws Exception {
-                    //given
-                    String fromUser = "testId";
-                    String toUser = "testId1";
-
-                    User from = UserFactory.user(1L, "testId");
-                    User to = UserFactory.user(2L, "testId1");
-
-                    FollowServiceRequest followServiceRequest = new FollowServiceRequest(fromUser,
-                            toUser);
-
-                    from.follow(to);
-
-                    given(userRepository.findUserByUserId(fromUser)).willReturn(Optional.of(from));
-                    given(userRepository.findUserByUserId(toUser)).willReturn(Optional.of(to));
-
-                    //when, then
-                    assertThatCode(() -> userService.followUser(followServiceRequest))
-                            .isInstanceOf(DuplicatedFollowException.class)
-                            .hasFieldOrPropertyWithValue("httpStatus", HttpStatus.BAD_REQUEST);
-
-                    verify(userRepository, times(1)).findUserByUserId(fromUser);
-                    verify(userRepository, times(1)).findUserByUserId(toUser);
-                }
+                verify(userRepository, times(1)).findUserByUserId(fromUser);
+                verify(userRepository, times(1)).findUserByUserId(toUser);
             }
         }
 
+        @DisplayName("회원이 이미 팔로우한 회원은")
+        @Nested
+        class Context_FollowedUser {
+
+            @Test
+            @DisplayName("팔로우할 수 없다.")
+            void followUser_FollowedUser_400Exception() throws Exception {
+                //given
+                String fromUser = "testId";
+                String toUser = "testId1";
+
+                User from = UserFactory.user(1L, "testId");
+                User to = UserFactory.user(2L, "testId1");
+
+                FollowServiceRequest followServiceRequest = new FollowServiceRequest(fromUser,
+                        toUser);
+
+                from.follow(to);
+
+                given(userRepository.findUserByUserId(fromUser)).willReturn(Optional.of(from));
+                given(userRepository.findUserByUserId(toUser)).willReturn(Optional.of(to));
+
+                //when, then
+                assertThatCode(() -> userService.followUser(followServiceRequest))
+                        .isInstanceOf(DuplicatedFollowException.class)
+                        .hasFieldOrPropertyWithValue("httpStatus", HttpStatus.BAD_REQUEST);
+
+                verify(userRepository, times(1)).findUserByUserId(fromUser);
+                verify(userRepository, times(1)).findUserByUserId(toUser);
+            }
+        }
+
+    }
+
+    @DisplayName("unfollowUser 메서드는")
+    @Nested
+    class Describe_unfollowUser {
+
+        @DisplayName("로그인 하지 않은 회원은")
+        @Nested
+        class context_NotLoginUser {
+
+            @Test
+            @DisplayName("언팔로우할 수 없다.")
+            void unfollowUser_NotLoginUser_400Exception() throws Exception {
+                //given
+                String from = "testId1";
+                String to = "testId2";
+
+                FollowServiceRequest request = new FollowServiceRequest(from, to);
+
+                //when, then
+                assertThatThrownBy(() -> userService.unfollowUser(request)).isInstanceOf(
+                                                                                   InvalidUserException.class)
+                                                                           .hasFieldOrPropertyWithValue(
+                                                                                   "httpStatus",
+                                                                                   HttpStatus.BAD_REQUEST);
+
+            }
+
+        }
+
+        @DisplayName("존재하지 않는 회원은")
+        @Nested
+        class Context_InvalidUser {
+
+            @Test
+            @DisplayName("언팔로우할 수 없다.")
+            void unfollowUser_InvalidUser_400Exception() throws Exception {
+                //given
+                String fromUser = "testId";
+                User loginUser = UserFactory.user(1L, "testId");
+
+                String invalidToUser = "testId1";
+
+                given(userRepository.findUserByUserId(fromUser)).willReturn(
+                        Optional.of(loginUser));
+                given(userRepository.findUserByUserId(invalidToUser)).willReturn(
+                        Optional.empty());
+
+                FollowServiceRequest unFollowServiceRequest = new FollowServiceRequest(
+                        fromUser,
+                        invalidToUser);
+
+                //when, then
+                assertThatThrownBy(() -> userService.unfollowUser(unFollowServiceRequest))
+                        .isInstanceOf(InvalidUserException.class)
+                        .hasFieldOrPropertyWithValue("httpStatus", HttpStatus.BAD_REQUEST);
+
+                verify(userRepository, times(1)).findUserByUserId(fromUser);
+                verify(userRepository, times(1)).findUserByUserId(invalidToUser);
+            }
+        }
+
+        @DisplayName("fromUser와 toUser가 동일하다면")
+        @Nested
+        class Context_SameFromToUser {
+
+            @Test
+            @DisplayName("언팔로우할 수 없다.")
+            void unfollowUser_SameFromToUser_400Exception() throws Exception {
+                //given
+                String fromUser = "testId";
+                String toUser = "testId";
+
+                User from = UserFactory.user(1L, "testId");
+                User to = UserFactory.user(1L, "testId");
+
+                FollowServiceRequest unfollowServiceRequest = new FollowServiceRequest(fromUser,
+                        toUser);
+
+                given(userRepository.findUserByUserId(fromUser)).willReturn(Optional.of(from));
+                given(userRepository.findUserByUserId(toUser)).willReturn(Optional.of(to));
+
+                //when, then
+                assertThatThrownBy(() -> userService.unfollowUser(unfollowServiceRequest))
+                        .isInstanceOf(SameFromToUserException.class)
+                        .hasFieldOrPropertyWithValue("httpStatus", HttpStatus.BAD_REQUEST);
+
+                verify(userRepository, times(2)).findUserByUserId(fromUser);
+            }
+
+
+        }
+
+        @DisplayName("팔로우하지 않은 회원은")
+        @Nested
+        class context_NotFollowedUser {
+
+            @Test
+            @DisplayName("언팔로우할 수 없다.")
+            void unfollowUser_NotFollowedUser_400Exception() throws Exception {
+                //given
+                String fromUser = "testId";
+                String toUser = "testId1";
+
+                User from = UserFactory.user(1L, "testId");
+                User to = UserFactory.user(2L, "testId1");
+
+                FollowServiceRequest unfollowServiceRequest = new FollowServiceRequest(fromUser,
+                        toUser);
+
+                given(userRepository.findUserByUserId(fromUser)).willReturn(Optional.of(from));
+                given(userRepository.findUserByUserId(toUser)).willReturn(Optional.of(to));
+
+                //when, then
+                assertThatThrownBy(() -> userService.unfollowUser(unfollowServiceRequest))
+                        .isInstanceOf(InvalidFollowException.class)
+                        .hasFieldOrPropertyWithValue("httpStatus", HttpStatus.BAD_REQUEST);
+
+                verify(userRepository, times(1)).findUserByUserId(fromUser);
+                verify(userRepository, times(1)).findUserByUserId(toUser);
+            }
+        }
+
+        @DisplayName("이미 팔로우한 회원에 대해서")
+        @Nested
+        class context_FollowedUser {
+
+            @Test
+            @DisplayName("언팔로우할 수 있다")
+            void unfollow_FollowedUser_Success() throws Exception {
+                String fromUser = "testId";
+                String toUser = "testId1";
+
+                User from = UserFactory.user(1L, "testId");
+                User to = UserFactory.user(2L, "testId1");
+
+                FollowServiceRequest unfollowServiceRequest = new FollowServiceRequest(fromUser,
+                        toUser);
+
+                given(userRepository.findUserByUserId(fromUser)).willReturn(Optional.of(from));
+                given(userRepository.findUserByUserId(toUser)).willReturn(Optional.of(to));
+
+                from.follow(to);
+
+                //when
+                FollowServiceResponse serviceResponse = userService.unfollowUser(
+                        unfollowServiceRequest);
+
+                // then
+                assertThat(serviceResponse.getFollowerCount()).isZero();
+                assertThat(serviceResponse.isFollowing()).isFalse();
+
+                verify(userRepository, times(1)).findUserByUserId(fromUser);
+                verify(userRepository, times(1)).findUserByUserId(toUser);
+            }
+        }
 
     }
 
