@@ -8,17 +8,14 @@ import com.sns.whisper.domain.user.presentation.request.UserSignUpRequest;
 import com.sns.whisper.domain.user.presentation.response.FollowResponse;
 import com.sns.whisper.global.aop.LoginCheck;
 import com.sns.whisper.global.dto.HttpResponseDto;
-import com.sns.whisper.global.resolver.AuthUser;
+import com.sns.whisper.global.resolver.AppUser;
 import com.sns.whisper.global.resolver.Authenticated;
 import jakarta.validation.Valid;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -55,10 +52,10 @@ public class UserController {
 
     @LoginCheck
     @PostMapping("/{userId}/followings")
-    public ResponseEntity<?> followUser(@Authenticated AuthUser authUser,
+    public ResponseEntity<?> followUser(@Authenticated AppUser appUser,
             @PathVariable String userId) {
 
-        FollowServiceRequest serviceRequest = new FollowServiceRequest(authUser.getUserId(),
+        FollowServiceRequest serviceRequest = new FollowServiceRequest(appUser.getUserId(),
                 userId);
 
         FollowResponse followResponse = FollowResponse.from(userService.followUser(serviceRequest));
@@ -69,10 +66,10 @@ public class UserController {
 
     @LoginCheck
     @DeleteMapping("/{userId}/followings")
-    public ResponseEntity<?> unfollowUser(@Authenticated AuthUser authUser,
+    public ResponseEntity<?> unfollowUser(@Authenticated AppUser appUser,
             @PathVariable String userId) {
 
-        FollowServiceRequest serviceRequest = new FollowServiceRequest(authUser.getUserId(),
+        FollowServiceRequest serviceRequest = new FollowServiceRequest(appUser.getUserId(),
                 userId);
 
         FollowResponse followResponse = FollowResponse.from(
@@ -80,14 +77,5 @@ public class UserController {
 
         return HttpResponseDto.okWithData(HttpStatus.OK, userId + "님을 언팔로우했습니다.",
                 followResponse);
-    }
-
-    @GetMapping("/{userId}/followings")
-    public ResponseEntity<?> searchFollowings(@PageableDefault Pageable pageable,
-            @PathVariable String userId, @Authenticated AuthUser authUser) {
-
-        String loginUser = authUser.getUserId();
-
-        return null;
     }
 }

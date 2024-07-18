@@ -5,7 +5,7 @@ import com.sns.whisper.domain.post.presentation.request.PostModifyRequest;
 import com.sns.whisper.domain.post.presentation.request.PostUploadRequest;
 import com.sns.whisper.global.aop.LoginCheck;
 import com.sns.whisper.global.dto.HttpResponseDto;
-import com.sns.whisper.global.resolver.AuthUser;
+import com.sns.whisper.global.resolver.AppUser;
 import com.sns.whisper.global.resolver.Authenticated;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -27,10 +27,10 @@ public class PostController {
     @PostMapping
     @LoginCheck
     public ResponseEntity<?> uploadPost(@Valid PostUploadRequest postUploadRequest, @Authenticated
-    AuthUser authUser) {
+    AppUser appUser) {
 
         Long postId = postService.uploadPost(
-                postUploadRequest.toServiceRequest(authUser.getUserId()));
+                postUploadRequest.toServiceRequest(appUser.getUserId()));
 
         return HttpResponseDto.okWithData(HttpStatus.CREATED, "게시물을 업로드했습니다.", postId);
     }
@@ -38,9 +38,9 @@ public class PostController {
     @PatchMapping("/{postId}")
     @LoginCheck
     public ResponseEntity<?> modifyPost(@PathVariable Long postId,
-            @Valid PostModifyRequest postModifyRequest, @Authenticated AuthUser authUser) {
+            @Valid PostModifyRequest postModifyRequest, @Authenticated AppUser appUser) {
 
-        postService.modifyPost(postModifyRequest.toServiceRequest(postId, authUser.getUserId()));
+        postService.modifyPost(postModifyRequest.toServiceRequest(postId, appUser.getUserId()));
 
         return HttpResponseDto.ok(HttpStatus.OK, "게시물을 수정했습니다.");
     }
