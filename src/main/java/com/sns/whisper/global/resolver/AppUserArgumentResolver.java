@@ -1,7 +1,6 @@
 package com.sns.whisper.global.resolver;
 
 import com.sns.whisper.domain.user.application.LoginService;
-import com.sns.whisper.exception.post.NotAuthorizedUserException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.MethodParameter;
 import org.springframework.stereotype.Component;
@@ -12,7 +11,7 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 
 @RequiredArgsConstructor
 @Component
-public class AuthUserArgumentResolver implements HandlerMethodArgumentResolver {
+public class AppUserArgumentResolver implements HandlerMethodArgumentResolver {
 
     private final LoginService loginService;
 
@@ -28,9 +27,9 @@ public class AuthUserArgumentResolver implements HandlerMethodArgumentResolver {
         String userId = loginService.getCurrentUserId();
 
         if (userId == null) {
-            throw new NotAuthorizedUserException();
+            return new GuestUser();
         }
 
-        return new AuthUser(userId);
+        return new LoginUser(userId);
     }
 }
