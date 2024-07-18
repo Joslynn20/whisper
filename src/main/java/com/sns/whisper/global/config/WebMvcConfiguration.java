@@ -1,6 +1,6 @@
 package com.sns.whisper.global.config;
 
-import com.sns.whisper.global.resolver.AuthUserArgumentResolver;
+import com.sns.whisper.global.resolver.AppUserArgumentResolver;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
@@ -11,10 +11,10 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @RequiredArgsConstructor
 public class WebMvcConfiguration implements WebMvcConfigurer {
 
-    private final AuthUserArgumentResolver authUserArgumentResolver;
+    private final AppUserArgumentResolver appUserArgumentResolver;
 
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
-        resolvers.add(authUserArgumentResolver);
+        resolvers.add(appUserArgumentResolver);
     }
 }

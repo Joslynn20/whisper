@@ -11,7 +11,7 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 
 @RequiredArgsConstructor
 @Component
-public class AuthUserArgumentResolver implements HandlerMethodArgumentResolver {
+public class AppUserArgumentResolver implements HandlerMethodArgumentResolver {
 
     private final LoginService loginService;
 
@@ -29,7 +29,7 @@ public class AuthUserArgumentResolver implements HandlerMethodArgumentResolver {
         if (userId == null) {
             return new GuestUser();
         }
-        
+
         return new LoginUser(userId);
     }
 }
