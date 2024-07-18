@@ -1,7 +1,7 @@
 package com.sns.whisper.common.mockapi;
 
-import com.sns.whisper.global.resolver.AuthUser;
 import com.sns.whisper.global.resolver.Authenticated;
+import com.sns.whisper.global.resolver.LoginUser;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.MethodParameter;
 import org.springframework.web.bind.support.WebDataBinderFactory;
@@ -22,6 +22,6 @@ public class MockAuthUserArgumentResolver implements HandlerMethodArgumentResolv
     public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
             NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
 
-        return new AuthUser("testId");
+        return new LoginUser("testId");
     }
 }
