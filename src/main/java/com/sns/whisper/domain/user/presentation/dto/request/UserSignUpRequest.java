@@ -1,4 +1,4 @@
-package com.sns.whisper.domain.user.presentation.request;
+package com.sns.whisper.domain.user.presentation.dto.request;
 
 import com.sns.whisper.domain.user.application.dto.request.UserSignUpServiceRequest;
 import com.sns.whisper.global.validation.AllowedContentType;

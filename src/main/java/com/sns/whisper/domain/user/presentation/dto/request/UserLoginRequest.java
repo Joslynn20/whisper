@@ -1,4 +1,4 @@
-package com.sns.whisper.domain.user.presentation.request;
+package com.sns.whisper.domain.user.presentation.dto.request;
 
 import static lombok.AccessLevel.PROTECTED;
 

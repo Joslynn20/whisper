@@ -1,4 +1,4 @@
-package com.sns.whisper.domain.user.presentation.response;
+package com.sns.whisper.domain.user.presentation.dto.response;
 
 import com.sns.whisper.domain.user.application.dto.response.FollowServiceResponse;
 import lombok.Builder;
