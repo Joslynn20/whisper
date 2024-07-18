@@ -3,14 +3,14 @@ package com.sns.whisper.domain.user.presentation;
 import com.sns.whisper.domain.user.application.LoginService;
 import com.sns.whisper.domain.user.application.UserService;
 import com.sns.whisper.domain.user.application.dto.request.FollowServiceRequest;
+import com.sns.whisper.domain.user.presentation.request.UserLoginRequest;
 import com.sns.whisper.domain.user.presentation.request.UserSignUpRequest;
 import com.sns.whisper.domain.user.presentation.response.FollowResponse;
 import com.sns.whisper.global.aop.LoginCheck;
 import com.sns.whisper.global.dto.HttpResponseDto;
-import com.sns.whisper.global.resolver.AuthUser;
+import com.sns.whisper.global.resolver.AppUser;
 import com.sns.whisper.global.resolver.Authenticated;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -39,8 +39,8 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@NotBlank String userId, @NotBlank String password) {
-        loginService.login(userId, password);
+    public ResponseEntity<?> login(@Valid UserLoginRequest request) {
+        loginService.login(request.getUserId(), request.getPassword());
         return HttpResponseDto.ok(HttpStatus.OK, "로그인되었습니다.");
     }
 
@@ -52,10 +52,10 @@ public class UserController {
 
     @LoginCheck
     @PostMapping("/{userId}/followings")
-    public ResponseEntity<?> followUser(@Authenticated AuthUser authUser,
+    public ResponseEntity<?> followUser(@Authenticated AppUser appUser,
             @PathVariable String userId) {
 
-        FollowServiceRequest serviceRequest = new FollowServiceRequest(authUser.getUserId(),
+        FollowServiceRequest serviceRequest = new FollowServiceRequest(appUser.getUserId(),
                 userId);
 
         FollowResponse followResponse = FollowResponse.from(userService.followUser(serviceRequest));
@@ -66,10 +66,10 @@ public class UserController {
 
     @LoginCheck
     @DeleteMapping("/{userId}/followings")
-    public ResponseEntity<?> unfollowUser(@Authenticated AuthUser authUser,
+    public ResponseEntity<?> unfollowUser(@Authenticated AppUser appUser,
             @PathVariable String userId) {
 
-        FollowServiceRequest serviceRequest = new FollowServiceRequest(authUser.getUserId(),
+        FollowServiceRequest serviceRequest = new FollowServiceRequest(appUser.getUserId(),
                 userId);
 
         FollowResponse followResponse = FollowResponse.from(
