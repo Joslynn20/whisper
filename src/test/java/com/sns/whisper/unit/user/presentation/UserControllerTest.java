@@ -1,6 +1,7 @@
 package com.sns.whisper.unit.user.presentation;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.contains;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
@@ -213,17 +214,19 @@ public class UserControllerTest extends ControllerTest {
                 any(AuthUserForUserRequest.class))).willReturn(searchServiceResponses);
 
         //when
-        String body = mockMvc.perform(get("/api/users/{userId}/followings", "testId4")
-                                     .param("page", "0")
-                                     .param("limit", "0"))
-                             .andDo(print())
-                             .andExpect(status().isOk())
-                             .andReturn()
-                             .getResponse()
-                             .getContentAsString();
+        ResultActions resultActions = mockMvc.perform(
+                get("/api/users/{userId}/followings", "testId4")
+                        .param("page", "0")
+                        .param("limit", "0"));
 
         //then
-        assertThat(body).contains(objectMapper.writeValueAsString(searchServiceResponses));
+        resultActions.andExpect(status().isOk())
+                     .andExpect(jsonPath("$['data'][*].profileImage",
+                             contains("test-image1.png", "test-image2.png",
+                                     "test-image3.png")))
+                     .andExpect(jsonPath("$['data'][*].userId",
+                             contains("testId1", "testId2", "testId")))
+                     .andExpect(jsonPath("$['data'][*].following", contains(true, false, null)));
 
         verify(loginService, times(1)).getCurrentUserId();
         verify(userService, times(1)).searchFollowings(any(), anyString(), any());
