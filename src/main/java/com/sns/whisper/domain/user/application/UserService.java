@@ -90,6 +90,7 @@ public class UserService {
                              .orElseThrow(InvalidUserException::new);
     }
 
+    @Transactional(readOnly = true)
     public List<UserSearchServiceResponse> searchFollowings(Pageable pageable,
             String from,
             AuthUserForUserRequest authUser) {
