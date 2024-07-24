@@ -1,29 +1,37 @@
 package com.sns.whisper.unit.user.presentation;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.contains;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.sns.whisper.domain.user.application.dto.request.AuthUserForUserRequest;
 import com.sns.whisper.domain.user.application.dto.request.FollowServiceRequest;
 import com.sns.whisper.domain.user.application.dto.request.UserSignUpServiceRequest;
 import com.sns.whisper.domain.user.application.dto.response.FollowServiceResponse;
+import com.sns.whisper.domain.user.application.dto.response.UserSearchServiceResponse;
 import com.sns.whisper.unit.ControllerTest;
 import java.time.LocalDate;
+import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.ArgumentCaptor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpMethod;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.ResultActions;
@@ -39,7 +47,7 @@ public class UserControllerTest extends ControllerTest {
         MultiValueMap<String, String> params = getParams();
 
         MockMultipartFile profileImage = new MockMultipartFile("profileImage",
-                "profileImage.png", "image/png", "profileImage" .getBytes());
+                "profileImage.png", "image/png", "profileImage".getBytes());
 
         //when, then
         mockMvc.perform(multipart(HttpMethod.POST, "/api/users").file(profileImage)
@@ -60,7 +68,7 @@ public class UserControllerTest extends ControllerTest {
         MultiValueMap<String, String> params = getParams();
 
         MockMultipartFile profileImage = new MockMultipartFile("profileImage",
-                file, "image/png", "profileImage.exe" .getBytes());
+                file, "image/png", "profileImage.exe".getBytes());
 
         //when, then
         mockMvc.perform(multipart(HttpMethod.POST, "/api/users").file(profileImage)
@@ -80,7 +88,7 @@ public class UserControllerTest extends ControllerTest {
         MultiValueMap<String, String> params = getParams();
 
         MockMultipartFile profileImage = new MockMultipartFile("profileImage",
-                "profileImage.png", contentType, "profileImage.exe" .getBytes());
+                "profileImage.png", contentType, "profileImage.exe".getBytes());
 
         //when, then
         mockMvc.perform(multipart(HttpMethod.POST, "/api/users").file(profileImage)
@@ -100,13 +108,18 @@ public class UserControllerTest extends ControllerTest {
         String userId = "userId1234";
         String password = "password1234";
 
+        ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
+
         //when, then
+        doNothing().when(loginService)
+                   .login(valueCapture.capture(), valueCapture.capture());
         mockMvc.perform(post("/api/users/login").param("userId", userId)
                                                 .param("password", password))
                .andDo(print())
                .andExpect(status().isOk());
 
-        verify(loginService).login(anyString(), anyString());
+        assertThat(valueCapture.getAllValues()).isEqualTo(List.of(userId, password));
+        verify(loginService, times(1)).login(anyString(), anyString());
     }
 
 
@@ -150,7 +163,6 @@ public class UserControllerTest extends ControllerTest {
         //given
         FollowServiceResponse responseDto = new FollowServiceResponse(1, true);
 
-        given(loginService.getCurrentUserId()).willReturn("testId");
         given(userService.followUser(any(FollowServiceRequest.class))).willReturn(responseDto);
 
         //when
@@ -173,7 +185,6 @@ public class UserControllerTest extends ControllerTest {
         //given
         FollowServiceResponse responseDto = new FollowServiceResponse(0, false);
 
-        given(loginService.getCurrentUserId()).willReturn("testId");
         given(userService.unfollowUser(any(FollowServiceRequest.class))).willReturn(responseDto);
 
         //when
@@ -190,6 +201,36 @@ public class UserControllerTest extends ControllerTest {
         verify(userService, times(1)).unfollowUser(any(FollowServiceRequest.class));
     }
 
+    @Test
+    @DisplayName("회원은 특정 회원의 팔로잉 목록을 조회할 수 있다.")
+    void searchFollowing_ValidUser_Success() throws Exception {
+        //given
+        List<UserSearchServiceResponse> searchServiceResponses = List.of(
+                new UserSearchServiceResponse("test-image1.png", "testId1", true),
+                new UserSearchServiceResponse("test-image2.png", "testId2", false),
+                new UserSearchServiceResponse("test-image3.png", "testId", null));
+
+        given(userService.searchFollowings(any(Pageable.class), anyString(),
+                any(AuthUserForUserRequest.class))).willReturn(searchServiceResponses);
+
+        //when
+        ResultActions resultActions = mockMvc.perform(
+                get("/api/users/{userId}/followings", "testId4")
+                        .param("page", "0")
+                        .param("limit", "0"));
+
+        //then
+        resultActions.andExpect(status().isOk())
+                     .andExpect(jsonPath("$['data'][*].profileImage",
+                             contains("test-image1.png", "test-image2.png",
+                                     "test-image3.png")))
+                     .andExpect(jsonPath("$['data'][*].userId",
+                             contains("testId1", "testId2", "testId")))
+                     .andExpect(jsonPath("$['data'][*].following", contains(true, false, null)));
+
+        verify(loginService, times(1)).getCurrentUserId();
+        verify(userService, times(1)).searchFollowings(any(), anyString(), any());
+    }
 
     private MultiValueMap<String, String> getParams() {
 
