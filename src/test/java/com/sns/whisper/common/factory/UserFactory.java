@@ -4,6 +4,7 @@ import com.sns.whisper.domain.user.domain.User;
 import com.sns.whisper.global.common.PasswordEncryptor;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class UserFactory {
 
@@ -30,5 +31,10 @@ public class UserFactory {
                        .id(id)
                        .userId(userId)
                        .build();
+    }
+
+    public static List<User> mockUsers() {
+        return List.of(createBasicUser("testId1"), createBasicUser("testId2"),
+                createBasicUser("testId3"), createBasicUser("testId4"), createBasicUser("testId5"));
     }
 }
