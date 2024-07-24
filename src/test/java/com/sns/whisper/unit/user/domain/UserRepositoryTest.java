@@ -122,9 +122,9 @@ public class UserRepositoryTest {
 
                 userRepository.saveAll(List.of(user1, user2, user3, user4));
 
-                user2.follow(user1);
-                user3.follow(user1);
-                user4.follow(user1);
+                user1.follow(user2);
+                user1.follow(user3);
+                user1.follow(user4);
 
                 testEntityManager.flush();
                 testEntityManager.clear();

@@ -13,5 +13,5 @@ public interface UserRepository {
 
     Optional<User> findUserByUserId(String userId);
 
-    List<User> findFollowingsOf(User toUser, Pageable pageable);
+    List<User> findFollowingsOf(User fromUser, Pageable pageable);
 }
