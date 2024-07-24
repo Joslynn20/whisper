@@ -14,6 +14,6 @@ public interface JPAUserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findUserByBasicProfileUserId(String userId);
 
-    @Query("select from_user from Follow f join f.fromUser from_user on f.toUser = :user")
-    List<User> findFollowingsOf(@Param("user") User user, Pageable pageable);
+    @Query("select to_User from Follow f join f.toUser to_User on f.fromUser = :fromUser")
+    List<User> findFollowingsOf(@Param("fromUser") User fromUser, Pageable pageable);
 }

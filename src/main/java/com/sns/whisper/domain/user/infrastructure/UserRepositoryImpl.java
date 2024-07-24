@@ -31,7 +31,7 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public List<User> findFollowingsOf(User user, Pageable pageable) {
-        return jpaUserRepository.findFollowingsOf(user, pageable);
+    public List<User> findFollowingsOf(User fromUser, Pageable pageable) {
+        return jpaUserRepository.findFollowingsOf(fromUser, pageable);
     }
 }
