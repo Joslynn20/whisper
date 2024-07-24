@@ -41,8 +41,6 @@ public class PostControllerTest extends ControllerTest {
         MockMultipartFile image2 = new MockMultipartFile("images",
                 "image2.png", "image/png", "images".getBytes());
 
-        given(loginService.getCurrentUserId()).willReturn("testId");
-
         //when, then
         mockMvc.perform(multipart(HttpMethod.POST, "/api/posts").file(image1)
                                                                 .file(image2)
@@ -63,6 +61,7 @@ public class PostControllerTest extends ControllerTest {
         String content = "새로운 게시물입니다.";
         MockMultipartFile image = new MockMultipartFile("images",
                 "image1.png", "image/png", "images".getBytes());
+        given(loginService.getCurrentUserId()).willReturn(null);
 
         //when, then
         mockMvc.perform(multipart(HttpMethod.POST, "/api/posts")
@@ -75,7 +74,7 @@ public class PostControllerTest extends ControllerTest {
                .andExpect(result -> assertEquals(requireNonNull(result.getResolvedException())
                        .getMessage(), "로그인 후 이용 가능합니다."));
 
-        verify(loginService, times(1)).getCurrentUserId();
+        verify(loginService, times(2)).getCurrentUserId();
         verify(postService, never()).uploadPost(any(PostUploadServiceRequest.class));
 
     }
@@ -181,8 +180,6 @@ public class PostControllerTest extends ControllerTest {
 
         String content = "수정 게시물입니다.";
 
-        given(loginService.getCurrentUserId()).willReturn("testId");
-
         //when, then
         mockMvc.perform(patch("/api/posts/1")
                        .param("content", content))
@@ -199,8 +196,6 @@ public class PostControllerTest extends ControllerTest {
     void modifyPost_ContentOver500_400Exception() throws Exception {
         //given
         String content = "a".repeat(501);
-
-        given(loginService.getCurrentUserId()).willReturn("testId");
 
         //when, then
         mockMvc.perform(patch("/api/posts/1")

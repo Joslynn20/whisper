@@ -1,9 +1,12 @@
 package com.sns.whisper.domain.user.application;
 
+import com.sns.whisper.domain.user.application.dto.UserDtoAssembler;
+import com.sns.whisper.domain.user.application.dto.request.AuthUserForUserRequest;
 import com.sns.whisper.domain.user.application.dto.request.FollowServiceRequest;
 import com.sns.whisper.domain.user.application.dto.request.UserSignUpServiceRequest;
 import com.sns.whisper.domain.user.application.dto.response.FollowServiceResponse;
 import com.sns.whisper.domain.user.application.dto.response.UserResponse;
+import com.sns.whisper.domain.user.application.dto.response.UserSearchServiceResponse;
 import com.sns.whisper.domain.user.domain.User;
 import com.sns.whisper.domain.user.domain.respository.ProfileStorage;
 import com.sns.whisper.domain.user.domain.respository.UserRepository;
@@ -12,8 +15,10 @@ import com.sns.whisper.exception.user.DuplicatedUserIdException;
 import com.sns.whisper.exception.user.FileUploadException;
 import com.sns.whisper.exception.user.InvalidUserException;
 import com.sns.whisper.global.common.PasswordEncryptor;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -85,4 +90,28 @@ public class UserService {
                              .orElseThrow(InvalidUserException::new);
     }
 
+    @Transactional(readOnly = true)
+    public List<UserSearchServiceResponse> searchFollowings(Pageable pageable,
+            String from,
+            AuthUserForUserRequest authUser) {
+
+        User fromUser = findUserByUserId(from);
+
+        List<User> followings = userRepository.findFollowingsOf(fromUser, pageable);
+
+        return getUserSearchResponse(authUser, followings);
+    }
+
+    private List<UserSearchServiceResponse> getUserSearchResponse(AuthUserForUserRequest authUser,
+            List<User> followings) {
+
+        if (authUser.isGuest()) {
+            return UserDtoAssembler.UserSearchResponse(followings);
+        }
+
+        User loginUser = findUserByUserId(authUser.getUserId());
+
+        return UserDtoAssembler.UserSearchResponse(followings, loginUser);
+
+    }
 }

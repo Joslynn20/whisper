@@ -13,6 +13,7 @@ public class MockUserSessionManager implements SessionManager {
 
     public MockUserSessionManager() {
         this.session = new MockHttpSession();
+        this.saveUser("testId");
     }
 
     @Override

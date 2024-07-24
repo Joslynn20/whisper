@@ -159,7 +159,12 @@ public class User extends BaseEntity {
     }
 
 
-    public boolean isFollowing(User toUser) {
+    public Boolean isFollowing(User toUser) {
+
+        if (this.equals(toUser)) {
+            return null;
+        }
+        
         return this.followings.isFollowing(toUser);
     }
 

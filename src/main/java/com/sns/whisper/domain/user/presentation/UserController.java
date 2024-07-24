@@ -2,20 +2,29 @@ package com.sns.whisper.domain.user.presentation;
 
 import com.sns.whisper.domain.user.application.LoginService;
 import com.sns.whisper.domain.user.application.UserService;
+import com.sns.whisper.domain.user.application.dto.request.AuthUserForUserRequest;
 import com.sns.whisper.domain.user.application.dto.request.FollowServiceRequest;
-import com.sns.whisper.domain.user.presentation.request.UserLoginRequest;
-import com.sns.whisper.domain.user.presentation.request.UserSignUpRequest;
-import com.sns.whisper.domain.user.presentation.response.FollowResponse;
+import com.sns.whisper.domain.user.application.dto.response.UserSearchServiceResponse;
+import com.sns.whisper.domain.user.presentation.dto.UserAssembler;
+import com.sns.whisper.domain.user.presentation.dto.request.UserLoginRequest;
+import com.sns.whisper.domain.user.presentation.dto.request.UserSignUpRequest;
+import com.sns.whisper.domain.user.presentation.dto.response.FollowResponse;
+import com.sns.whisper.domain.user.presentation.dto.response.UserSearchResponse;
 import com.sns.whisper.global.aop.LoginCheck;
 import com.sns.whisper.global.dto.HttpResponseDto;
 import com.sns.whisper.global.resolver.AppUser;
 import com.sns.whisper.global.resolver.Authenticated;
 import jakarta.validation.Valid;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -77,5 +86,22 @@ public class UserController {
 
         return HttpResponseDto.okWithData(HttpStatus.OK, userId + "님을 언팔로우했습니다.",
                 followResponse);
+    }
+
+    @GetMapping("/{userId}/followings")
+    public ResponseEntity<?> searchFollowings(@PageableDefault Pageable pageable,
+            @PathVariable(name = "userId") String fromUser, @Authenticated AppUser appUser) {
+
+        AuthUserForUserRequest authUser = UserAssembler.getAuthUser(appUser);
+
+        List<UserSearchServiceResponse> serviceResponse =
+                userService.searchFollowings(pageable, fromUser, authUser);
+
+        List<UserSearchResponse> response = serviceResponse.stream()
+                                                           .map(UserSearchResponse::from)
+                                                           .collect(Collectors.toList());
+
+        return HttpResponseDto.okWithData(HttpStatus.OK, "팔로잉 목록을 조회했습니다.",
+                response);
     }
 }
