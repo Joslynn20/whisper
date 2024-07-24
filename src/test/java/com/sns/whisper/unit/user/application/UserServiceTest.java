@@ -3,6 +3,7 @@ package com.sns.whisper.unit.user.application;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.any;
@@ -11,10 +12,12 @@ import static org.mockito.Mockito.verify;
 
 import com.sns.whisper.common.factory.UserFactory;
 import com.sns.whisper.domain.user.application.UserService;
+import com.sns.whisper.domain.user.application.dto.request.AuthUserForUserRequest;
 import com.sns.whisper.domain.user.application.dto.request.FollowServiceRequest;
 import com.sns.whisper.domain.user.application.dto.request.UserSignUpServiceRequest;
 import com.sns.whisper.domain.user.application.dto.response.FollowServiceResponse;
 import com.sns.whisper.domain.user.application.dto.response.UserResponse;
+import com.sns.whisper.domain.user.application.dto.response.UserSearchServiceResponse;
 import com.sns.whisper.domain.user.domain.User;
 import com.sns.whisper.domain.user.domain.profile.BasicProfile;
 import com.sns.whisper.domain.user.domain.profile.Email;
@@ -29,6 +32,7 @@ import com.sns.whisper.exception.user.NotValidEmailFormatException;
 import com.sns.whisper.exception.user.SameFromToUserException;
 import com.sns.whisper.global.common.PasswordEncryptor;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -38,6 +42,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 
 @ExtendWith(MockitoExtension.class)
@@ -355,7 +361,7 @@ public class UserServiceTest {
 
         @DisplayName("팔로우하지 않은 회원은")
         @Nested
-        class context_NotFollowedUser {
+        class Context_NotFollowedUser {
 
             @Test
             @DisplayName("언팔로우할 수 없다.")
@@ -417,6 +423,117 @@ public class UserServiceTest {
             }
         }
 
+    }
+
+    @Nested
+    @DisplayName("searchFollowings 메소드는")
+    class Describe_searchFollowings {
+
+        @Nested
+        @DisplayName("로그인하지 않은 게스트 회원일 때,")
+        class Context_GuestUser {
+
+            @Test
+            @DisplayName("특정 회원의 팔로잉 회원 목록을 조회할 수 있다. - 팔로잉 여부 null")
+            void searchFollowings_GuestUser_FollowingNull() throws Exception {
+                //given
+                String from = "testId1";
+
+                Pageable pageable = PageRequest.of(0, 3);
+
+                // 게스트 회원
+                AuthUserForUserRequest authUser = new AuthUserForUserRequest(null, true);
+
+                User fromUser = UserFactory.user(1L, from);
+
+                List<User> followings = List.of(UserFactory.user(2L, "testId2"),
+                        UserFactory.user(3L, "testId3"));
+
+                given(userRepository.findUserByUserId(from)).willReturn(Optional.of(fromUser));
+                given(userRepository.findFollowingsOf(fromUser, pageable)).willReturn(followings);
+
+                //when
+                List<UserSearchServiceResponse> responses = userService.searchFollowings(pageable,
+                        from, authUser);
+
+                //then
+                assertThat(responses.size()).isEqualTo(2);
+                assertThat(responses).extracting("userId", "following")
+                                     .containsExactly(tuple("testId2", null),
+                                             tuple("testId3", null));
+
+                verify(userRepository, times(1)).findUserByUserId(from);
+                verify(userRepository, times(1)).findFollowingsOf(fromUser, pageable);
+            }
+        }
+
+        @DisplayName("로그인 회원일 때,")
+        @Nested
+        class Context_LoginUser {
+
+            @Test
+            @DisplayName("특정 회원의 팔로잉 회원 목록을 조회할 수 있다. - 팔로잉 여부 true/false, 본인 null")
+            void searchFollowings_LoginUser_FollowingBoolean() throws Exception {
+                //given
+                String from = "testId1";
+                Pageable pageable = PageRequest.of(0, 3);
+                AuthUserForUserRequest authUser = new AuthUserForUserRequest("loginUser", false);
+
+                User fromUser = UserFactory.user(1L, from);
+
+                User followUser1 = UserFactory.user(2L, "testId2");
+                User followUser2 = UserFactory.user(3L, "testId3");
+                User loginUser = UserFactory.user(4L, authUser.getUserId());
+
+                fromUser.follow(followUser1);
+                fromUser.follow(followUser2);
+                fromUser.follow(loginUser);
+
+                loginUser.follow(followUser1);
+
+                given(userRepository.findUserByUserId(from)).willReturn(Optional.of(fromUser));
+                given(userRepository.findFollowingsOf(fromUser, pageable)).willReturn(
+                        List.of(followUser1, followUser2, loginUser));
+                given(userRepository.findUserByUserId("loginUser")).willReturn(
+                        Optional.of(loginUser));
+
+                //when
+                List<UserSearchServiceResponse> responses = userService.searchFollowings(pageable,
+                        from, authUser);
+
+                //then
+                assertThat(responses.size()).isEqualTo(3);
+                assertThat(responses).extracting("userId", "following")
+                                     .containsExactly(tuple("testId2", true),
+                                             tuple("testId3", false),
+                                             tuple(authUser.getUserId(), null));
+
+                verify(userRepository, times(1)).findUserByUserId(from);
+                verify(userRepository, times(1)).findFollowingsOf(fromUser, pageable);
+            }
+
+
+            @Test
+            @DisplayName("존재하지 않는 회원의 팔로잉 목록은 조회할 수 없다.")
+            void searchFollowings_NotValidUser_400Exception() throws Exception {
+                //given
+                AuthUserForUserRequest authUser = new AuthUserForUserRequest("loginUser", false);
+
+                given(userRepository.findUserByUserId("fromUser")).willReturn(Optional.empty());
+
+                //when, then
+                assertThatThrownBy(
+                        () -> userService.searchFollowings(PageRequest.of(0, 3), "fromUser",
+                                authUser)).isInstanceOf(
+                                                  InvalidUserException.class)
+                                          .hasFieldOrPropertyWithValue(
+                                                  "httpStatus",
+                                                  HttpStatus.BAD_REQUEST);
+
+                verify(userRepository, times(1)).findUserByUserId(anyString());
+                verify(userRepository, times(0)).findFollowingsOf(any(), any());
+            }
+        }
     }
 
     private UserSignUpServiceRequest createSignUpRequest(String email) {

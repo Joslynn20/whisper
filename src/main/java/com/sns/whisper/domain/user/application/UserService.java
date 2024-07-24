@@ -1,5 +1,6 @@
 package com.sns.whisper.domain.user.application;
 
+import com.sns.whisper.domain.user.application.dto.UserDtoAssembler;
 import com.sns.whisper.domain.user.application.dto.request.AuthUserForUserRequest;
 import com.sns.whisper.domain.user.application.dto.request.FollowServiceRequest;
 import com.sns.whisper.domain.user.application.dto.request.UserSignUpServiceRequest;
@@ -90,8 +91,26 @@ public class UserService {
     }
 
     public List<UserSearchServiceResponse> searchFollowings(Pageable pageable,
-            String userId,
+            String from,
             AuthUserForUserRequest authUser) {
-        return null;
+
+        User fromUser = findUserByUserId(from);
+
+        List<User> followings = userRepository.findFollowingsOf(fromUser, pageable);
+
+        return getUserSearchResponse(authUser, followings);
+    }
+
+    private List<UserSearchServiceResponse> getUserSearchResponse(AuthUserForUserRequest authUser,
+            List<User> followings) {
+
+        if (authUser.isGuest()) {
+            return UserDtoAssembler.UserSearchResponse(followings);
+        }
+
+        User loginUser = findUserByUserId(authUser.getUserId());
+
+        return UserDtoAssembler.UserSearchResponse(followings, loginUser);
+
     }
 }
