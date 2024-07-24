@@ -90,12 +90,12 @@ public class UserController {
 
     @GetMapping("/{userId}/followings")
     public ResponseEntity<?> searchFollowings(@PageableDefault Pageable pageable,
-            @PathVariable String userId, @Authenticated AppUser appUser) {
+            @PathVariable(name = "userId") String fromUser, @Authenticated AppUser appUser) {
 
         AuthUserForUserRequest authUser = UserAssembler.getAuthUser(appUser);
 
         List<UserSearchServiceResponse> serviceResponse =
-                userService.searchFollowings(pageable, userId, authUser);
+                userService.searchFollowings(pageable, fromUser, authUser);
 
         List<UserSearchResponse> response = serviceResponse.stream()
                                                            .map(UserSearchResponse::from)
