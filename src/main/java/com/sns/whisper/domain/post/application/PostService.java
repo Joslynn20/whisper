@@ -1,5 +1,6 @@
 package com.sns.whisper.domain.post.application;
 
+import com.sns.whisper.domain.post.application.dto.request.PostDeleteServiceRequest;
 import com.sns.whisper.domain.post.application.dto.request.PostModifyServiceRequest;
 import com.sns.whisper.domain.post.application.dto.request.PostUploadServiceRequest;
 import com.sns.whisper.domain.post.domain.Post;
@@ -62,6 +63,9 @@ public class PostService {
 
         post.updateContent(serviceRequest.getContent());
 
+    }
+
+    public void deletePost(PostDeleteServiceRequest postDeleteServiceRequest) {
     }
 
     private User findUserByUserId(String userId) {
