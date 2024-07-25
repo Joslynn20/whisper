@@ -41,7 +41,7 @@ public class LoginServiceIntegrationTest extends IntegrationTest {
         String userId = "userId12";
         String password = "password1234";
 
-        User user = UserFactory.createBasicUser(userId, password);
+        User user = UserFactory.user(userId, password);
         userRepository.save(user);
 
         //when
@@ -78,7 +78,7 @@ public class LoginServiceIntegrationTest extends IntegrationTest {
         String userId = "userId123";
         String wrongPassword = "wrongPass1234";
 
-        User user = UserFactory.createBasicUser(userId, "password1234");
+        User user = UserFactory.user(userId, "password1234");
         userRepository.save(user);
 
         //when, then

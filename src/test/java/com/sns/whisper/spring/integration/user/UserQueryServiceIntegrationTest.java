@@ -41,8 +41,8 @@ public class UserQueryServiceIntegrationTest extends IntegrationTest {
         List<User> searchUsers = UserFactory.mockUsers();
         userRepository.saveAll(searchUsers);
 
-        User fromUser = UserFactory.createBasicUser("fromUser");
-        User loginUser = UserFactory.createBasicUser("loginUser");
+        User fromUser = UserFactory.user("fromUser");
+        User loginUser = UserFactory.user("loginUser");
 
         userRepository.saveAll(List.of(fromUser, loginUser));
 
@@ -92,7 +92,7 @@ public class UserQueryServiceIntegrationTest extends IntegrationTest {
         List<User> searchUsers = UserFactory.mockUsers();
         userRepository.saveAll(searchUsers);
 
-        User fromUser = UserFactory.createBasicUser("fromUser");
+        User fromUser = UserFactory.user("fromUser");
 
         userRepository.save(fromUser);
 
@@ -112,7 +112,7 @@ public class UserQueryServiceIntegrationTest extends IntegrationTest {
         //when
         List<UserSearchServiceResponse> responses = userService.searchFollowings(pageable,
                 fromUser.getUserId(), authUser);
-        
+
         //then
         assertThat(responses.size()).isEqualTo(5);
         assertThat(responses).extracting("userId", "following")

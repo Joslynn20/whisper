@@ -61,7 +61,7 @@ public class UserRepositoryTest {
         String userId = "userId12";
         String password = "password1234";
 
-        User user = UserFactory.createBasicUser(userId, password);
+        User user = UserFactory.user(userId, password);
         userRepository.save(user);
 
         //when
@@ -86,10 +86,10 @@ public class UserRepositoryTest {
             @DisplayName("빈 리스트를 반환한다.")
             void findFollowingsOf_NoFollowings_EmptyList() throws Exception {
                 //given
-                User user1 = UserFactory.createBasicUser("testId1");
-                User user2 = UserFactory.createBasicUser("testId2");
-                User user3 = UserFactory.createBasicUser("testId3");
-                User user4 = UserFactory.createBasicUser("testId4");
+                User user1 = UserFactory.user("testId1");
+                User user2 = UserFactory.user("testId2");
+                User user3 = UserFactory.user("testId3");
+                User user4 = UserFactory.user("testId4");
 
                 userRepository.saveAll(List.of(user1, user2, user3, user4));
 
@@ -115,10 +115,10 @@ public class UserRepositoryTest {
             @DisplayName("페이징 조건에 따라 회원의 following 목록을 조회할 수 있다.")
             void findFollowingsOf_ValidFollowings_Pageable() throws Exception {
                 //given
-                User user1 = UserFactory.createBasicUser("testId1");
-                User user2 = UserFactory.createBasicUser("testId2");
-                User user3 = UserFactory.createBasicUser("testId3");
-                User user4 = UserFactory.createBasicUser("testId4");
+                User user1 = UserFactory.user("testId1");
+                User user2 = UserFactory.user("testId2");
+                User user3 = UserFactory.user("testId3");
+                User user4 = UserFactory.user("testId4");
 
                 userRepository.saveAll(List.of(user1, user2, user3, user4));
 
