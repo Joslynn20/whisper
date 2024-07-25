@@ -1,6 +1,6 @@
 package com.sns.whisper.global.resolver;
 
-import com.sns.whisper.exception.post.NotAuthorizedUserException;
+import com.sns.whisper.exception.post.UnAuthorizedUserException;
 
 public class GuestUser extends AppUser {
 
@@ -12,7 +12,7 @@ public class GuestUser extends AppUser {
 
     @Override
     public String getUserId() {
-        throw new NotAuthorizedUserException();
+        throw new UnAuthorizedUserException();
     }
 
     @Override
