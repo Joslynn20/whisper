@@ -45,6 +45,8 @@ public class Post {
         this.user = user;
         this.content = content;
         this.images = images;
+
+        images.belongTo(this);
     }
 
     public Long getId() {
