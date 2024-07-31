@@ -65,7 +65,17 @@ public class PostService {
 
     }
 
-    public void deletePost(PostDeleteServiceRequest postDeleteServiceRequest) {
+    public void deletePost(PostDeleteServiceRequest serviceRequest) {
+        Post post = postRepository.findById(serviceRequest.getPostId())
+                                  .orElseThrow(NotFoundPostException::new);
+
+        User loginUser = findUserByUserId(serviceRequest.getUserId());
+
+        if (!post.isWrittenByUser(loginUser)) {
+            throw new PostNotBelongToUserException();
+        }
+
+        postRepository.delete(post);
     }
 
     private User findUserByUserId(String userId) {
