@@ -46,7 +46,7 @@ public class LoginServiceTest {
         String userId = "userId123";
         String password = "password1234";
 
-        User savedUser = UserFactory.createBasicUser(userId, password);
+        User savedUser = UserFactory.user(userId, password);
         given(userRepository.findUserByUserId(userId)).willReturn(Optional.of(savedUser));
 
         //when
@@ -87,7 +87,7 @@ public class LoginServiceTest {
 
         String savedPassword = "testPassword1234";
 
-        User savedUser = UserFactory.createBasicUser(userId, savedPassword);
+        User savedUser = UserFactory.user(userId, savedPassword);
 
         given(userRepository.findUserByUserId(userId)).willReturn(Optional.of(savedUser));
 

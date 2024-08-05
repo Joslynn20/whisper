@@ -111,7 +111,7 @@ public class UserServiceIntegrationTest extends IntegrationTest {
         String fromId = "testId";
         String toId = "testId1";
 
-        User fromUser = UserFactory.createBasicUser(fromId);
+        User fromUser = UserFactory.user(fromId);
 
         userRepository.save(fromUser);
 
@@ -130,7 +130,7 @@ public class UserServiceIntegrationTest extends IntegrationTest {
         String fromId = "testId";
         String sameId = "testId";
 
-        User fromUser = UserFactory.createBasicUser(fromId);
+        User fromUser = UserFactory.user(fromId);
         userRepository.save(fromUser);
 
         FollowServiceRequest followServiceRequest = new FollowServiceRequest(fromId, sameId);
@@ -148,8 +148,8 @@ public class UserServiceIntegrationTest extends IntegrationTest {
         String fromId = "testId";
         String toId = "testId1";
 
-        User fromUser = UserFactory.createBasicUser(fromId);
-        User toUser = UserFactory.createBasicUser(toId);
+        User fromUser = UserFactory.user(fromId);
+        User toUser = UserFactory.user(toId);
 
         User from = userRepository.save(fromUser);
         User to = userRepository.save(toUser);
@@ -171,8 +171,8 @@ public class UserServiceIntegrationTest extends IntegrationTest {
         String fromId = "testId";
         String toId = "testId1";
 
-        User fromUser = UserFactory.createBasicUser(fromId);
-        User toUser = UserFactory.createBasicUser(toId);
+        User fromUser = UserFactory.user(fromId);
+        User toUser = UserFactory.user(toId);
 
         User from = userRepository.save(fromUser);
         User to = userRepository.save(toUser);
@@ -194,7 +194,7 @@ public class UserServiceIntegrationTest extends IntegrationTest {
         String fromId = "testId";
         String toId = "testId1";
 
-        User fromUser = UserFactory.createBasicUser(fromId);
+        User fromUser = UserFactory.user(fromId);
 
         userRepository.save(fromUser);
 
@@ -214,7 +214,7 @@ public class UserServiceIntegrationTest extends IntegrationTest {
         String fromId = "testId";
         String toId = "testId";
 
-        User fromUser = UserFactory.createBasicUser(fromId);
+        User fromUser = UserFactory.user(fromId);
 
         userRepository.save(fromUser);
 
@@ -235,8 +235,8 @@ public class UserServiceIntegrationTest extends IntegrationTest {
         String fromId = "testId";
         String toId = "testId1";
 
-        User fromUser = UserFactory.createBasicUser(fromId);
-        User toUser = UserFactory.createBasicUser(toId);
+        User fromUser = UserFactory.user(fromId);
+        User toUser = UserFactory.user(toId);
 
         userRepository.save(fromUser);
         userRepository.save(toUser);
@@ -258,8 +258,8 @@ public class UserServiceIntegrationTest extends IntegrationTest {
         String fromId = "testId";
         String toId = "testId1";
 
-        User fromUser = UserFactory.createBasicUser(fromId);
-        User toUser = UserFactory.createBasicUser(toId);
+        User fromUser = UserFactory.user(fromId);
+        User toUser = UserFactory.user(toId);
 
         userRepository.save(fromUser);
         userRepository.save(toUser);

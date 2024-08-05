@@ -5,6 +5,7 @@ import static java.util.stream.Collectors.toList;
 import com.sns.whisper.domain.post.domain.content.Image;
 import com.sns.whisper.domain.post.domain.content.Images;
 import com.sns.whisper.domain.user.domain.User;
+import com.sns.whisper.global.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
@@ -20,7 +21,7 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "post")
-public class Post {
+public class Post extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -45,6 +46,7 @@ public class Post {
         this.user = user;
         this.content = content;
         this.images = images;
+        images.belongTo(this);
     }
 
     public Long getId() {

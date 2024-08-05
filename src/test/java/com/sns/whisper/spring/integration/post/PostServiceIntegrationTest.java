@@ -14,8 +14,9 @@ import com.sns.whisper.domain.user.infrastructure.JPAUserRepository;
 import com.sns.whisper.exception.post.NotFoundUserException;
 import com.sns.whisper.exception.post.PostNotBelongToUserException;
 import com.sns.whisper.spring.integration.IntegrationTest;
+import jakarta.persistence.EntityManager;
 import java.util.List;
-import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,10 +35,15 @@ public class PostServiceIntegrationTest extends IntegrationTest {
     @Autowired
     private JPAPostRepository postRepository;
 
-    @AfterEach
-    public void tearDown() {
-        postRepository.deleteAllInBatch();
-        userRepository.deleteAllInBatch();
+    @Autowired
+    private EntityManager entityManager;
+
+    @BeforeEach
+    void setUp() {
+        entityManager
+                .createNativeQuery(
+                        "ALTER TABLE POST ALTER COLUMN `id` RESTART WITH 1")
+                .executeUpdate();
     }
 
     @Test
@@ -45,7 +51,7 @@ public class PostServiceIntegrationTest extends IntegrationTest {
     void uploadPost_Valid_Success() throws Exception {
         //given
 
-        User user = UserFactory.createBasicUser("testUser", "password1234");
+        User user = UserFactory.user("testId", "password1234");
         userRepository.save(user);
 
         PostUploadServiceRequest serviceRequest = createServiceRequest();
@@ -77,7 +83,7 @@ public class PostServiceIntegrationTest extends IntegrationTest {
     @DisplayName("회원은 게시물을 수정할 수 있다.")
     void modifyPost_ValidContentAndUser_Success() throws Exception {
         //given
-        User user = UserFactory.createBasicUser("testId", "password1234");
+        User user = UserFactory.user("testId", "password1234");
         userRepository.save(user);
 
         Post post = Post.builder()
@@ -100,8 +106,8 @@ public class PostServiceIntegrationTest extends IntegrationTest {
     @DisplayName("현재 회원이 작성하지 않은 게시물은 수정할 수 없다.")
     void modifyPost_PostNotBelongToUser_403ExceptionThrown() throws Exception {
         //given
-        User user = UserFactory.createBasicUser("testId", "password1234");
-        User currentUser = UserFactory.createBasicUser("currentUserId", "password12345");
+        User user = UserFactory.user("testId", "password1234");
+        User currentUser = UserFactory.user("currentUserId", "password12345");
 
         userRepository.saveAll(List.of(user, currentUser));
 
@@ -133,7 +139,7 @@ public class PostServiceIntegrationTest extends IntegrationTest {
                 "image1.png", "image/png", "images".getBytes()));
 
         return PostUploadServiceRequest.builder()
-                                       .userId("testUser")
+                                       .userId("testId")
                                        .content("새로운 게시물입니다.")
                                        .images(testImages)
                                        .build();

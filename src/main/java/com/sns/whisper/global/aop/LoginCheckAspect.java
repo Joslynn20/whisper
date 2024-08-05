@@ -1,7 +1,7 @@
 package com.sns.whisper.global.aop;
 
 import com.sns.whisper.domain.user.application.LoginService;
-import com.sns.whisper.exception.post.NotAuthorizedUserException;
+import com.sns.whisper.exception.post.UnAuthorizedUserException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
@@ -26,7 +26,7 @@ public class LoginCheckAspect {
         String userId = loginService.getCurrentUserId();
 
         if (userId == null) {
-            throw new NotAuthorizedUserException();
+            throw new UnAuthorizedUserException();
         }
 
     }

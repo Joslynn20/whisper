@@ -2,6 +2,7 @@ package com.sns.whisper.unit;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sns.whisper.config.InfrastructureTestConfiguration;
+import com.sns.whisper.config.LoginTestConfiguration;
 import com.sns.whisper.domain.post.application.PostService;
 import com.sns.whisper.domain.post.presentation.PostController;
 import com.sns.whisper.domain.user.application.LoginService;
@@ -19,7 +20,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(value = {UserController.class, PostController.class})
 @Import({AopAutoConfiguration.class, LoginCheckAspect.class,
-        InfrastructureTestConfiguration.class})
+        InfrastructureTestConfiguration.class, LoginTestConfiguration.class})
 @ActiveProfiles("test")
 public class ControllerTest {
 
