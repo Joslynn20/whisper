@@ -3,16 +3,21 @@ package com.sns.whisper.unit.post.application;
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.willDoNothing;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import com.sns.whisper.common.factory.PostFactory;
 import com.sns.whisper.common.factory.UserFactory;
 import com.sns.whisper.domain.post.application.PostService;
+import com.sns.whisper.domain.post.application.dto.request.PostDeleteServiceRequest;
 import com.sns.whisper.domain.post.application.dto.request.PostModifyServiceRequest;
 import com.sns.whisper.domain.post.application.dto.request.PostUploadServiceRequest;
 import com.sns.whisper.domain.post.domain.Post;
@@ -20,11 +25,13 @@ import com.sns.whisper.domain.post.domain.repository.ImageStorage;
 import com.sns.whisper.domain.post.domain.repository.PostRepository;
 import com.sns.whisper.domain.user.domain.User;
 import com.sns.whisper.domain.user.domain.respository.UserRepository;
+import com.sns.whisper.exception.post.NotFoundPostException;
 import com.sns.whisper.exception.post.NotFoundUserException;
 import com.sns.whisper.exception.post.PostNotBelongToUserException;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -160,6 +167,129 @@ public class PostServiceTest {
         verify(postRepository, times(1)).findById(savedPost.getId());
         verify(userRepository, times(1)).findUserByUserId(currentUser.getUserId());
 
+    }
+
+    @DisplayName("deletePost 메소드는")
+    @Nested
+    class Describe_deletePost {
+
+        @DisplayName("존재하지 않는 게시물일 때,")
+        @Nested
+        class Context_NotExistedPost {
+
+            @Test
+            @DisplayName("삭제할 수 없다.")
+            void deletePost_NotExistedPost_404Exception() throws Exception {
+                //given
+                PostDeleteServiceRequest serviceRequest = new PostDeleteServiceRequest(1L,
+                        "testId");
+                given(postRepository.findById(anyLong())).willReturn(Optional.empty());
+
+                //when, then
+                assertThatThrownBy(() -> postService.deletePost(serviceRequest)).isInstanceOf(
+                                                                                        NotFoundPostException.class)
+                                                                                .hasFieldOrPropertyWithValue(
+                                                                                        "httpStatus",
+                                                                                        HttpStatus.NOT_FOUND);
+
+                verify(postRepository, times(1)).findById(anyLong());
+                verify(userRepository, never()).findUserByUserId(anyString());
+                verify(postRepository, never()).delete(any());
+            }
+        }
+
+        @DisplayName("존재하지 않는 회원일 때,")
+        @Nested
+        class Context_NotValidUser {
+
+            @Test
+            @DisplayName("삭제할 수 없다.")
+            void deletePost_NotValidUser_404Exception() throws Exception {
+                //given
+                User writer = UserFactory.user(1L, "testId");
+                PostDeleteServiceRequest serviceRequest = new PostDeleteServiceRequest(1L,
+                        "testId");
+                Post post = PostFactory.post(1L, writer);
+
+                given(postRepository.findById(anyLong())).willReturn(Optional.of(post));
+
+                //when, then
+                assertThatThrownBy(() -> postService.deletePost(serviceRequest)).isInstanceOf(
+                                                                                        NotFoundUserException.class)
+                                                                                .hasFieldOrPropertyWithValue(
+                                                                                        "httpStatus",
+                                                                                        HttpStatus.NOT_FOUND);
+
+                verify(postRepository, times(1)).findById(anyLong());
+                verify(userRepository, times(1)).findUserByUserId(anyString());
+                verify(postRepository, never()).delete(any());
+            }
+        }
+
+        @Nested
+        @DisplayName("로그인 회원과 게시물 작성자가 일치하지 않으면")
+        class Context_PostNotBelongToUser {
+
+            @Test
+            @DisplayName("게시물을 삭제할 수 없다. -403 예외")
+            void deletePost_PostNotBelongToUser_403Exception() throws Exception {
+                //given
+                User writer = UserFactory.user(1L, "writer");
+                User loginUser = UserFactory.user(2L, "loginUser");
+
+                Post post = PostFactory.post(1L, writer);
+
+                given(postRepository.findById(anyLong())).willReturn(Optional.of(post));
+                given(userRepository.findUserByUserId(anyString())).willReturn(
+                        Optional.of(loginUser));
+
+                //when, then
+                PostDeleteServiceRequest serviceRequest = new PostDeleteServiceRequest(1L,
+                        "testId");
+
+                assertThatThrownBy(() -> postService.deletePost(serviceRequest)).isInstanceOf(
+                                                                                        PostNotBelongToUserException.class)
+                                                                                .hasFieldOrPropertyWithValue(
+                                                                                        "httpStatus",
+                                                                                        HttpStatus.FORBIDDEN);
+
+                verify(postRepository, times(1)).findById(anyLong());
+                verify(userRepository, times(1)).findUserByUserId(anyString());
+                verify(postRepository, never()).delete(any(Post.class));
+            }
+        }
+
+        @Nested
+        @DisplayName("로그인 회원과 작성자가 일치하면,")
+        class Context_PostBelongToUser {
+
+            @Test
+            @DisplayName("게시물을 삭제할 수 있다.")
+            void deletePost_PostBelongToUser_Success() throws Exception {
+                //given
+                User writer = UserFactory.user(1L, "writer");
+                User loginUser = UserFactory.user(1L, "writer");
+
+                Post post = PostFactory.post(1L, writer);
+
+                given(postRepository.findById(anyLong())).willReturn(Optional.of(post));
+                given(userRepository.findUserByUserId(anyString())).willReturn(
+                        Optional.of(loginUser));
+                willDoNothing().given(postRepository)
+                               .delete(any(Post.class));
+
+                PostDeleteServiceRequest serviceRequest = new PostDeleteServiceRequest(1L,
+                        loginUser.getUserId());
+
+                //when
+                postService.deletePost(serviceRequest);
+
+                //then
+                verify(postRepository, times(1)).findById(anyLong());
+                verify(userRepository, times(1)).findUserByUserId(anyString());
+                verify(postRepository, times(1)).delete(any(Post.class));
+            }
+        }
     }
 
     private PostModifyServiceRequest createModifyRequest(Post post, User user) {

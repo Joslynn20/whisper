@@ -5,18 +5,21 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.willDoNothing;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.sns.whisper.domain.post.application.dto.request.PostDeleteServiceRequest;
 import com.sns.whisper.domain.post.application.dto.request.PostModifyServiceRequest;
 import com.sns.whisper.domain.post.application.dto.request.PostUploadServiceRequest;
-import com.sns.whisper.exception.post.NotAuthorizedUserException;
+import com.sns.whisper.exception.post.UnAuthorizedUserException;
 import com.sns.whisper.unit.ControllerTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -69,7 +72,7 @@ public class PostControllerTest extends ControllerTest {
                )
                .andDo(print())
                .andExpect(status().isUnauthorized())
-               .andExpect(result -> assertInstanceOf(NotAuthorizedUserException.class,
+               .andExpect(result -> assertInstanceOf(UnAuthorizedUserException.class,
                        result.getResolvedException()))
                .andExpect(result -> assertEquals(requireNonNull(result.getResolvedException())
                        .getMessage(), "로그인 후 이용 가능합니다."));
@@ -177,7 +180,6 @@ public class PostControllerTest extends ControllerTest {
     @DisplayName("500자 이하의 유효한 내용은 수정 가능하다.")
     void modifyPost_ValidContent_Success() throws Exception {
         //given
-
         String content = "수정 게시물입니다.";
 
         //when, then
@@ -208,6 +210,40 @@ public class PostControllerTest extends ControllerTest {
 
         verify(postService, never()).modifyPost(any(PostModifyServiceRequest.class));
 
+    }
+
+    @Test
+    @DisplayName("로그인하지 않은 회원은 게시물 삭제 요청을 할 수 없다.")
+    void deletePost_GuestUser_401Exception() throws Exception {
+        //given
+        given(loginService.getCurrentUserId()).willReturn(null);
+        willDoNothing().given(postService)
+                       .deletePost(any(PostDeleteServiceRequest.class));
+
+        //when, then
+        mockMvc.perform(delete("/api/posts/1"))
+               .andDo(print())
+               .andExpect(status().isUnauthorized())
+               .andExpect(
+                       result -> assertInstanceOf(UnAuthorizedUserException.class,
+                               result.getResolvedException()));
+
+        verify(postService, never()).deletePost(any(PostDeleteServiceRequest.class));
+    }
+
+    @Test
+    @DisplayName("로그인 회원은 게시물 삭제 요청을 할 수 없다.")
+    void deletePost_LoginUser_401Exception() throws Exception {
+        //given
+        willDoNothing().given(postService)
+                       .deletePost(any(PostDeleteServiceRequest.class));
+
+        //when, then
+        mockMvc.perform(delete("/api/posts/1"))
+               .andDo(print())
+               .andExpect(status().isOk());
+
+        verify(postService, times(1)).deletePost(any(PostDeleteServiceRequest.class));
     }
 
 }

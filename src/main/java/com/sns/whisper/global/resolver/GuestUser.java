@@ -2,6 +2,7 @@ package com.sns.whisper.global.resolver;
 
 import com.sns.whisper.exception.post.NotAuthorizedUserException;
 
+
 public class GuestUser extends AppUser {
 
     private static final String GUEST_USERNAME = "guestUser";

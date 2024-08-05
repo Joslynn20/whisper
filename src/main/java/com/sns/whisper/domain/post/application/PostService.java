@@ -1,5 +1,6 @@
 package com.sns.whisper.domain.post.application;
 
+import com.sns.whisper.domain.post.application.dto.request.PostDeleteServiceRequest;
 import com.sns.whisper.domain.post.application.dto.request.PostModifyServiceRequest;
 import com.sns.whisper.domain.post.application.dto.request.PostUploadServiceRequest;
 import com.sns.whisper.domain.post.domain.Post;
@@ -62,6 +63,19 @@ public class PostService {
 
         post.updateContent(serviceRequest.getContent());
 
+    }
+
+    public void deletePost(PostDeleteServiceRequest serviceRequest) {
+        Post post = postRepository.findById(serviceRequest.getPostId())
+                                  .orElseThrow(NotFoundPostException::new);
+
+        User loginUser = findUserByUserId(serviceRequest.getUserId());
+
+        if (!post.isWrittenByUser(loginUser)) {
+            throw new PostNotBelongToUserException();
+        }
+
+        postRepository.delete(post);
     }
 
     private User findUserByUserId(String userId) {
