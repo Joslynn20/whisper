@@ -7,7 +7,6 @@ import com.sns.whisper.domain.user.domain.follow.Followings;
 import com.sns.whisper.domain.user.domain.profile.BasicProfile;
 import com.sns.whisper.domain.user.domain.profile.Email;
 import com.sns.whisper.domain.user.domain.profile.UserStatus;
-import com.sns.whisper.global.entity.BaseEntity;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -25,7 +24,7 @@ import org.springframework.data.annotation.PersistenceCreator;
 
 @Entity
 @Table(name = "\"user\"")
-public class User extends BaseEntity {
+public class User {
 
 
     @Id
@@ -164,7 +163,7 @@ public class User extends BaseEntity {
         if (this.equals(toUser)) {
             return null;
         }
-        
+
         return this.followings.isFollowing(toUser);
     }
 
