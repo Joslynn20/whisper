@@ -16,9 +16,7 @@ import com.sns.whisper.domain.user.infrastructure.JPAUserRepository;
 import com.sns.whisper.exception.post.NotFoundUserException;
 import com.sns.whisper.exception.post.PostNotBelongToUserException;
 import com.sns.whisper.spring.integration.IntegrationTest;
-import jakarta.persistence.EntityManager;
 import java.util.List;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,16 +35,6 @@ public class PostServiceIntegrationTest extends IntegrationTest {
     @Autowired
     private JPAPostRepository postRepository;
 
-    @Autowired
-    private EntityManager entityManager;
-
-    @BeforeEach
-    void setUp() {
-        entityManager
-                .createNativeQuery(
-                        "ALTER TABLE POST ALTER COLUMN `id` RESTART WITH 1")
-                .executeUpdate();
-    }
 
     @Test
     @DisplayName("게시물 업로드에 성공하면 PostId를 반환한다.")
