@@ -1,5 +1,6 @@
 package com.sns.whisper.common.factory;
 
+import com.sns.whisper.domain.comment.domain.Comments;
 import com.sns.whisper.domain.post.domain.Post;
 import com.sns.whisper.domain.post.domain.content.Image;
 import com.sns.whisper.domain.post.domain.content.Images;
@@ -7,6 +8,9 @@ import com.sns.whisper.domain.user.domain.User;
 import java.util.List;
 
 public class MockPost {
+
+    private MockPost() {
+    }
 
     public static Builder builder() {
         return new Builder();
@@ -19,6 +23,7 @@ public class MockPost {
         private Images images = new Images(
                 List.of(new Image("www.testImage1.png"), new Image("www.testImage2.png")));
         private String content = "게시물 내용입니다.";
+        private Comments comments = new Comments(List.of());
 
         public Builder id(Long id) {
             this.id = id;
@@ -40,6 +45,11 @@ public class MockPost {
             return this;
         }
 
+        public Builder comments(Comments comments) {
+            this.comments = comments;
+            return this;
+        }
+
 
         public Post build() {
             return Post.builder()
@@ -47,6 +57,7 @@ public class MockPost {
                        .user(user)
                        .content(content)
                        .images(images)
+                       .comments(comments)
                        .build();
         }
     }
