@@ -2,6 +2,7 @@ package com.sns.whisper.domain.post.domain;
 
 import static java.util.stream.Collectors.toList;
 
+import com.sns.whisper.domain.comment.domain.Comments;
 import com.sns.whisper.domain.post.domain.content.Image;
 import com.sns.whisper.domain.post.domain.content.Images;
 import com.sns.whisper.domain.user.domain.User;
@@ -37,15 +38,19 @@ public class Post extends BaseEntity {
     @Embedded
     private Images images;
 
+    @Embedded
+    private Comments comments;
+
 
     protected Post() {
     }
 
-    private Post(Long id, User user, String content, Images images) {
+    private Post(Long id, User user, String content, Images images, Comments comments) {
         this.id = id;
         this.user = user;
         this.content = content;
         this.images = images;
+        this.comments = comments;
         images.belongTo(this);
     }
 
@@ -79,6 +84,7 @@ public class Post extends BaseEntity {
         private User user;
         private Images images = new Images(List.of());
         private String content;
+        private Comments comments;
 
         public Builder id(Long id) {
             this.id = id;
@@ -104,6 +110,11 @@ public class Post extends BaseEntity {
             return this;
         }
 
+        public Builder comments(Comments comments) {
+            this.comments = comments;
+            return this;
+        }
+
         public Builder content(String content) {
             this.content = content;
             return this;
@@ -114,7 +125,8 @@ public class Post extends BaseEntity {
                     id,
                     user,
                     content,
-                    images
+                    images,
+                    comments
             );
         }
     }
