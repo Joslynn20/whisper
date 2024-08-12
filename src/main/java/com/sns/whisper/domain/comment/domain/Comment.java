@@ -2,7 +2,6 @@ package com.sns.whisper.domain.comment.domain;
 
 import com.sns.whisper.domain.post.domain.Post;
 import com.sns.whisper.domain.user.domain.User;
-import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -11,8 +10,11 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import java.util.Objects;
+import lombok.Builder;
+import lombok.Getter;
 
 @Entity
+@Getter
 public class Comment {
 
 
@@ -28,18 +30,32 @@ public class Comment {
     @JoinColumn(name = "post_id")
     private Post post;
 
-    @Embedded
-    private CommentContent content;
+    private String content;
 
     protected Comment() {
     }
 
-    public Comment(Long id, User user, Post post, CommentContent content) {
+    @Builder
+    public Comment(Long id, User user, Post post, String content) {
         this.id = id;
         this.user = user;
         this.post = post;
         this.content = content;
     }
+
+
+    public String getProfileImage() {
+        return user.getProfileImage();
+    }
+
+    public String getAuthorUserId() {
+        return user.getUserId();
+    }
+
+    public boolean isWrittenByUser(User user) {
+        return this.user.equals(user);
+    }
+
 
     @Override
     public boolean equals(Object o) {
