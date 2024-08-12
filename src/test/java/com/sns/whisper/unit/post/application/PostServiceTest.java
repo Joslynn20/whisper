@@ -159,10 +159,10 @@ public class PostServiceTest {
         given(userRepository.findUserByUserId(anyString())).willReturn(Optional.of(savedUser));
 
         //when, then
-        assertThatCode(() -> postService.modifyPost(postModifyServiceRequest))
+        assertThatThrownBy(() -> postService.modifyPost(postModifyServiceRequest))
                 .isInstanceOf(PostNotBelongToUserException.class)
                 .hasFieldOrPropertyWithValue("httpStatus", HttpStatus.FORBIDDEN)
-                .hasMessage("게시물을 수정할 수 없습니다.");
+                .hasMessage("현재 회원이 작성한 글이 아닙니다.");
 
         verify(postRepository, times(1)).findById(savedPost.getId());
         verify(userRepository, times(1)).findUserByUserId(currentUser.getUserId());
